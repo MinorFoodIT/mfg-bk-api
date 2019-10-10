@@ -3,12 +3,12 @@ version: '3.7'
 services:
   server:
     build:
-      context: ./server
+      context: .
       dockerfile: Dockerfile
       args:
         DB_HOST: db
-    container_name: 'mfg-4b-sz_server'
-    restart: 'always' #on-failure
+    container_name: 'mfg-bk-api'
+    restart: 'on-failure' #always
     depends_on:
       - db
     expose:
@@ -16,60 +16,34 @@ services:
     ports:
       - '4000:4000'
     networks: # Networks to join (Services on the same network can communicate with each other using their name)
-      - stack1_backend
-      - stack1_frontend
-
-  web:
-    #image: mfg-4b-sz:v1
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-      args:
-        REACT_APP_API_HOST: '127.0.0.1'
-        #REACT_APP_API_BASE_URL: 'http://:4000'
-    #extra_hosts:
-    #  - 'outside:${HOST_IP}'
-    container_name: 'mfg-4b-sz_web'
-    restart: 'always'
-    depends_on:
-      - server
-    expose: # accessible to linked services
-      - '80'  #${APP_SERVER_PORT}
-    ports:
-      - '80:80' #${APP_SERVER_PORT}:${APP_SERVER_PORT}
-    networks:
-      - stack1_frontend
-    links:
-      - server
+      - bk_api_backend
   db:
     image: mysql:5.7
     #ports:
     #  - "3306:3306"
-    container_name: 'mfg-4b-sz_db'
+    container_name: 'mfg-bk-db'
     restart: always
     environment:
-      MYSQL_DATABASE: 'storeasservice'
+      MYSQL_DATABASE: 'bkapi'
       MYSQL_USER: 'admin'
       MYSQL_PASSWORD: 'minor@1234'
       MYSQL_ROOT_PASSWORD: 'root'
     volumes:
       #- /Users/Macbook/stack/stack1_sz/db/data:/var/lib/mysql
-      - /home/minor/stack/volume/stack1_sz/db/data:/var/lib/mysql
-      - ./manage/db/config/my.cnf:/etc/mysql/my.cnf
+      - /home/minor/stack/volume/bk-api/db/data:/var/lib/mysql
     networks:
-      - stack1_backend
+      - bk_api_backend
   admin:
     image: adminer
     ports:
       - '8090:8080'
-    container_name: 'mfg-4b-sz_admin'
+    container_name: 'mfg-bk-db-admin'
     restart: always
     networks:
-      - stack1_backend
+      - bk_api_backend
 # Networks to be created to facilitate communication between containers
 networks:
-  stack1_backend:
-  stack1_frontend:
+  bk_api_backend:
 
 #services:
 #  mfg-4b-sz:
