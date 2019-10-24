@@ -33,7 +33,7 @@ const config = {
     port: envVars.PORT,
     jwtSecret: envVars.JWT_SECRET,
     lincense : envVars.LICENSECODE,
-    sdm_url : envVars.SDM_URL
+    sdm_url : envVars.SDM_URL,
     mysql_host: envVars.mysql_host,
     mysql_port: envVars.mysql_port,
     mysql_user: envVars.mysql_user,

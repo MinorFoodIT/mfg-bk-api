@@ -10,15 +10,14 @@ module.exports = function(args,cb) {
       if(err){
         console.log(err);
       }
-      //client.GetCustomerByEmail
-      //client.GetCustomerMin
-      client.RegisterCustomer(args, function(err1, result) {
-            console.log('RegisterCustomerResult');
+
+      client.ActiveCustomerAccount(args, function(err1, result) {
+            //console.log('ActiveCustomerAccount');
             
-            if(!result.RegisterCustomerResult){
+            if(!result.ActiveCustomerAccountResult){
               cb(err1,result.SDKResult);
             }else{
-              cb(err1,result.RegisterCustomerResult);
+              cb(err1,result.ActiveCustomerAccountResult);
             }
       });  
   });

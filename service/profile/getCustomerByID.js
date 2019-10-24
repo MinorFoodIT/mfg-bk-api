@@ -13,7 +13,7 @@ module.exports = function(args,cb) {
       //client.GetCustomerByEmail
       //client.GetCustomerMin
       client.GetCustomerByID(args, function(err1, result) {
-            console.log('GetCustomerByIDResult');
+            //console.log('GetCustomerByIDResult');
             
             if(!result.GetCustomerByIDResult){
               cb(err1,result.SDKResult);

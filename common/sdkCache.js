@@ -10,6 +10,7 @@ const GetWebProvincesList = require('./../service/geo/getWebProvincesList');
 const GetWebCitiesList = require('./../service/geo/getWebCitiesList');
 const GetWebDistrictsList = require('./../service/geo/getWebDistrictsList');
 const GetWebStreetsList = require('./../service/geo/getWebStreetsList');
+const GetCompList = require('./../service/master/getCompList');
 
 async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
@@ -328,9 +329,44 @@ let funcWebCities = () => {
     });
 }
 
+let funcCompList = () => {
+    return new Promise(resolve => {
+        console.log('Cache comp => start');
+        GetCompList({
+            licenseCode: process.env.LICENSECODE,
+            requestID:  uuidv4(),
+            language: 'En',
+            conceptID: 2,
+            menuTemplateID: 10
+        },function (err, sdkResponse){
+            if (err) {
+                console.log('GetCompList error ' + err);
+            }
+            let web_comp = sdkResponse["CComp"].map(store => {
+                return {
+                    comp_id: store["CompID"],
+                    check_name: store["CheckName"],
+                    name: store["Name"],
+                    amount: store["Amount"],
+                    percent_off: store["PercentOff"]
+                };
+            });
+
+            web_comp = web_comp.filter(comp => {
+                return String(comp["name"]) === String('Disc 50B')
+            });
+            myCache.set("web_comp",web_comp);
+            console.log(web_comp);
+            console.log('Cache comp => finished');
+            resolve('funcCompList');
+        });
+    });
+}
+
 let loadingFirst = async() =>{
     console.log('[Cache] load '+new Date());
     return await Promise.all([
+        //console.log('test')
         funcStores(),
         funcProvinces(),
         funcCities(),
@@ -339,6 +375,7 @@ let loadingFirst = async() =>{
         funcWebCountries(),
         funcWebProvinces(),
         funcWebCities(), //Include webDistrinct ,webstreet
+        funcCompList()
     ]);
 }
 

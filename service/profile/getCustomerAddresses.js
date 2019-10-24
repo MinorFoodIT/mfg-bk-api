@@ -11,7 +11,7 @@ module.exports = function(args,cb) {
         console.log(err);
       }
       client.GetCustomerAddresses(args, function(err1, result) {
-            console.log('GetCustomerAddressesResult');
+            //console.log('GetCustomerAddressesResult');
             
             if(!result.GetCustomerAddressesResult){
               cb(err1,result.SDKResult);
@@ -23,12 +23,15 @@ module.exports = function(args,cb) {
 }
 
 /**
-var get_customer_args = {
+var get_customer_addr_args = {
     licenseCode: process.env.LICENSECODE,
     requestID: '201909171328',
-    language: 'En',
-    customerID: 4000005013918610,
-    conceptID: 1
+    lang: 'En',
+    customerUserName: 'raoxyv5alqkzpcpokextljykp2dvlb@1112oneuser.com',
+    customerPassword: '123456',
+    conceptID: 1,
+    from: 1,
+    to: 1
 }
  */
 

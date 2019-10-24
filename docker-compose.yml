@@ -7,8 +7,11 @@ services:
       dockerfile: Dockerfile
       args:
         DB_HOST: db
+        TZ: 'Asia/Bangkok'
     container_name: 'mfg-bk-api'
-    restart: 'on-failure' #always
+    restart:  'always' #'on-failure'
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
     depends_on:
       - db
     expose:
@@ -24,13 +27,14 @@ services:
     container_name: 'mfg-bk-db'
     restart: always
     environment:
+      TZ: 'Asia/Bangkok'
       MYSQL_DATABASE: 'bkapi'
       MYSQL_USER: 'admin'
       MYSQL_PASSWORD: 'minor@1234'
       MYSQL_ROOT_PASSWORD: 'root'
     volumes:
-      #- /Users/Macbook/stack/stack1_sz/db/data:/var/lib/mysql
-      - /home/minor/stack/volume/bk-api/db/data:/var/lib/mysql
+      - /Users/Macbook/stack/bk-api/db/data:/var/lib/mysql
+      #- /home/minor/stack/volume/bk-api/db/data:/var/lib/mysql
     networks:
       - bk_api_backend
   admin:

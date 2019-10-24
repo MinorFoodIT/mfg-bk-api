@@ -12,7 +12,7 @@ module.exports = function(args,cb) {
       }
       //client.GetCustomerByEmail
       //client.GetCustomerMin
-      client.RegisterAddress(args, function(err1, result) {
+      client.RegisterAddress(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
             console.log('RegisterAddressResult');
             
             if(!result.RegisterAddressResult){

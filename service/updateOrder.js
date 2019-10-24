@@ -10,14 +10,15 @@ module.exports = function(args,cb) {
       if(err){
         console.log(err);
       }
-      client.UpdateOrder(args, function(err1, result) {
+      client.UpdateOrder(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
             console.log('UpdateOrder');
-            
+            console.log(rawRequest);
+            console.log(result);
             if(!result.UpdateOrderResult){
               cb(err1,result.SDKResult);
             }else{
               cb(err1,result.UpdateOrderResult);
-            }
+            }     
       });  
   });
 }

@@ -1,6 +1,6 @@
 const Joi = require('joi');
-const APIError = require('./../../common/APIError');
-const APIResponse = require('./../../common/APIResponse');
+const APIError = require('../../common/APIError');
+const APIResponse = require('../../common/APIResponse');
 /**
  * Functions
  * 

@@ -18,14 +18,12 @@ start() {
 }
 
 db-table-setup() {
-    echo "timezone"
-    cat db/timezone.sql | docker exec -i mfg-bk-db /usr/bin/mysql -u root --password=root
 
     echo "create tables"
-    cat db/create-tables.sql | docker exec -i mfg-bk-db /usr/bin/mysql -u root --password=root storeasservice
+    cat mysql/create-tables.sql | docker exec -i mfg-bk-db /usr/bin/mysql -u root --password=root bkapi
 
     echo "setup sites"
-    cat db/sites.sql | docker exec -i mfg-bk-db /usr/bin/mysql -u root --password=root storeasservice
+    cat mysql/sites.sql | docker exec -i mfg-bk-db /usr/bin/mysql -u root --password=root bkapi
 }
 
 db-backup() {
