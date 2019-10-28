@@ -12,6 +12,7 @@ module.exports = function(args,cb) {
       }
       client.UpdateOrder(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
             console.log('UpdateOrder');
+            console.log(args);
             console.log(rawRequest);
             console.log(result);
             if(!result.UpdateOrderResult){
@@ -19,7 +20,9 @@ module.exports = function(args,cb) {
             }else{
               cb(err1,result.UpdateOrderResult);
             }     
-      });  
+      },{postProcess: function(_xml) {
+        return _xml.replace('</q176:Entries><q176:Entries>', '');
+      }});  
   });
 }
 

@@ -234,13 +234,13 @@ router.get('/area', async (req, res) => {
       "AREA_ID": sdkResponse["AREA_ID"],
       "AREA_NAME": sdkResponse["AREA_NAME"],
       "AREA_PROVINCEID" : sdkResponse["AREA_PROVINCEID"],
-      "AREA_PROVINCE_NAME" : web_province[0]["province_name_thai"],
+      "AREA_PROVINCE_NAME" : web_province.length > 0 ? web_province[0]["province_name_thai"] : -1,
       "AREA_CITYID" : sdkResponse["AREA_CITYID"],
       "AREA_CITY_NAME" : web_city[0]["city_name_thai"],
       "AREA_DISTRICTID" : sdkResponse["AREA_DEF_DISTRICTID"],
-      "AREA_DISTRICT_NAME" : web_distrinct[0]["distinct_thai"],
+      "AREA_DISTRICT_NAME" : web_distrinct.length > 0 ? web_distrinct[0]["distinct_thai"] : -1,
       "AREA_STREETID" : sdkResponse["AREA_DEF_STREETID"],
-      "AREA_STREET_NAME" : web_street[0]["street_name"],
+      "AREA_STREET_NAME" : web_province.length > 0  ? web_street[0]["street_name"] : -1,
     }));
   });
 });
@@ -987,7 +987,7 @@ router.post('/createorder', (req, res) => {
   
             }else{
               console.log((new Date()).getHours());
-              if(parseInt((new Date()).getHours()) < 10  && (true || 'check blacklist'.length > 0) ){
+              if(parseInt((new Date()).getHours()) < 9  && (true || 'check blacklist'.length > 0) ){
                 console.log('Order - Check Store: Check Store Open at 10 AM.');
                 return callback('ขออภัย ขณะนี้เป็นเวลาปิดให้บริการจัดส่ง',null);
               }
@@ -1081,7 +1081,7 @@ router.post('/createorder', (req, res) => {
         GetArea({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
-          language: 'En',
+          language: 'Th',
           areaID: area_id //BK_TH
         },function(err,sdkResponse){
           if(err){
@@ -1089,21 +1089,28 @@ router.post('/createorder', (req, res) => {
               res.json((new APIError('Could not find the area',404,true)).returnJson());
           }
           
-          web_city = myCache.get("web_cities").filter(web =>{
-            return String(web["city_id"]) === String(sdkResponse["AREA_CITYID"])
-          })[0]["city_id"];
+          web_city = String(sdkResponse["AREA_CITYID"]);
+          web_province = String(sdkResponse["AREA_PROVINCEID"]);
+          web_distrinct = String(sdkResponse["AREA_DEF_DISTRICTID"]);
+          web_street = String(sdkResponse["AREA_DEF_STREETID"]);
+
+          // web_city = myCache.get("web_cities").filter(web =>{
+          //   return String(web["city_id"]) === String(sdkResponse["AREA_CITYID"])
+          // })[0]["city_id"];
       
-          web_province = myCache.get("web_provinces").filter(web =>{
-            return String(web["province_id"]) === String(sdkResponse["AREA_PROVINCEID"])
-          })[0]["province_id"];
+          // web_province = myCache.get("web_provinces").filter(web =>{
+          //   return String(web["province_id"]) === String(sdkResponse["AREA_PROVINCEID"])
+          // })[0]["province_id"];
       
-          web_distrinct = myCache.get("web_districts").filter(web =>{
-            return String(web["distinct_id"]) === String(sdkResponse["AREA_DEF_DISTRICTID"])
-          })[0]["distinct_id"];
+          // let web_distrinct_list = myCache.get("web_districts").filter(web =>{
+          //   return String(web["distinct_id"]) === String(sdkResponse["AREA_DEF_DISTRICTID"])
+          // });
+          
+          // web_distrinct = web_distrinct_list.length > 0 ? web_distrinct_list[0]["distinct_id"] : -1;
       
-          web_street = myCache.get("web_streets").filter(web =>{
-            return String(web["street_id"]) === String(sdkResponse["AREA_DEF_STREETID"])
-          })[0]["street_id"];
+          // web_street = myCache.get("web_streets").filter(web =>{
+          //   return String(web["street_id"]) === String(sdkResponse["AREA_DEF_STREETID"])
+          // })[0]["street_id"];
 
           console.log('web_city : '+web_city);
           console.log('web_province : '+web_province);
@@ -1117,16 +1124,34 @@ router.post('/createorder', (req, res) => {
         console.log('[Step6] Create_order'); 
         let sdk_entries = [];
          
+        let delivery_burger = {
+          'q176:CEntry':{
+            'q176:Category': -1,
+            'q176:DiscountPrice': 0,
+            'q176:Entries': '',
+            'q176:ItemID': 6001,
+            'q176:Level': 1,
+            'q176:LongName': 'Delivery Burger',
+            'q176:ModCode': entry_status.NONE,
+            'q176:Name': 'Delivery Burger',
+            'q176:OrdrMode': 'OM_SAVED',
+            'q176:Price': 0,
+            'q176:ShortName': 'Delivery Burger',
+            'q176:Status': entry_status.NOTAPPLIED,
+            'q176:Type': entry_type.ITEM,
+            'q176:Weight': 0
+          }
+        }
          //Check item order ,Entries
          each(entries,function(entry,cb){
           let sdk_entry_detail = {
             'q176:Category': -1,
             'q176:DiscountPrice': 0,
-            'q176:Entries': [],
+            'q176:Entries': [],//delivery_burger,
             'q176:ItemID': entry.item_id,
             'q176:Level': entry.level,
             'q176:LongName': entry.long_name,
-            'q176:ModCode': entry_status.NONE,
+            'q176:ModCode': entry_status.WITH,
             'q176:Name': entry.name,
             'q176:OrdrMode': 'OM_SAVED',
             'q176:Price': entry.price,
@@ -1145,50 +1170,74 @@ router.post('/createorder', (req, res) => {
             console.log('Error while mapping each entries : '+err);
           }else{
             console.log('Completed mapping entries : ');
-            console.log(sdk_entries);
+            //console.log(sdk_entries);
 
             let create_order = {
               'q176:AddressID': address_id,
               'q176:AreaID': area_id,
               'q176:AuthReq': 0,
+              'q176:AuthReqReason': 0,
+              'q176:AuthReqRemarks': '',
+              'q176:AuthTime': '0001-01-01T00:00:00',
               'q176:BackupStoreID': -1,
               'q176:Change': check_change,
               'q176:CityID': web_city,
-              'q176:Comps': '', //[],
+              'q176:Comps': '', 
               'q176:ConceptID': 2,
               'q176:CountryID': 1,
               'q176:CreateBy': phatform + ' - ' + 'burgerking '+channel ,
               'q176:CustomerID': customer["CUST_ID"],
               'q176:DiscountTotal': Number(discount_total).toFixed(2),
-              'q176:Discounts': '', //[],
+              'q176:Discounts': '', 
               'q176:DistrictID': web_distrinct,
+              'q176:DriverID': 0,
+              'q176:DriverName': '',
+              'q176:DueTime': '0001-01-01T00:00:00',
               'q176:Entries': sdk_entries,
+              'q176:FirstSendTime': '0001-01-01T00:00:00',
               'q176:GrossTotal': gross_total,
               'q176:IsAuth': store_id === -1 ? 0 : 1,
-              'q176:Note': [],
+              'q176:IsExternal': 0,
+              'q176:LastSendTime': '0001-01-01T00:00:00',
+              'q176:Note': '',
               'q176:OrderMode': shipping_method === 'delivery' ? 1 : 2,
               'q176:OrderName': 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
               'q176:OrderType': order_method === 'now' ? 0 : 1,
+              'q176:PromiseTime': 0,
               'q176:ProvinceID': web_province,
+              'q176:RejectReason': 0,
               'q176:SalesAmount': check_total,
               'q176:ServiceCharge': service_change,
               'q176:Source': 2,
               'q176:Status': 0,
+              'q176:StatusTime': '0001-01-01T00:00:00',
+              'q176:StoreDOB': '',
+              'q176:StoreDueTime': '0001-01-01T00:00:00',
               'q176:StoreID': store_id,
               'q176:StoreName': store_name,
               'q176:StoreNumber': store_name,
+              'q176:StoreOrderMode': 0,
               'q176:StreetID': web_street,
               'q176:SubTotal': check_subtotal,
+              'q176:SuspendReason': 0,
               'q176:Total': check_total,
+              'q176:ValidateStore': 0,
+              'q176:VoidReason': 0,
               'q176:ZoneID': -1
             }
 
             let update_order = {
               'tns:licenseCode': process.env.LICENSECODE,
               'tns:requestID': uuidv4(),
-              'tns:language': 'En',
+              'tns:language': 'Th',
               'tns:conceptID': 2,
-              'tns:order': create_order
+              'tns:order': create_order,
+              'tns:autoApprove': true,
+              'tns:useBackupStoreIfAvailable': false,
+              'tns:orderNotes1': '',
+              'tns:orderNotes2': '',
+              'tns:creditCardPaymentbool': false,
+              'tns:isSuspended': false
             }
             console.log('Createorder -> '+JSON.stringify(update_order));
             UpdateOrder(update_order,function(err,sdkResponse){
@@ -1209,27 +1258,28 @@ router.post('/createorder', (req, res) => {
     
                   console.log('[INSERT Order data] '+ sdkResponse)
                   var orderData  = {
+                    orderID: sdkResponse,
                     channel: channel,	
                     addressID: address_id,
                     areaID:	area_id,	
                     storeID: store_id,	
                     storeName: store_name,	
                     storeNumber: store_id,	
-                    orderMode: shipping_method === 'delivery' ? '1' : '2' ,	
+                    orderMode:  2 ,//shipping_method === 'delivery' ? '1' : '2' ,	
                     orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
                     orderType: order_method === 'now' ? '0' : '1',
-                    tranDate:	CURRENT_TIMESTAMP,	
+                    //tranDate:	CURRENT_TIMESTAMP(),	
                     dueDate: null,	
                     customerID:	customer["CUST_ID"],
                     grossTotal: gross_total	,
                     discountTotal: Number(discount_total).toFixed(2),	
                     refID: '',	
                     transactionBy:	'',	
-                    createdDate: CURRENT_TIMESTAMP,
+                    //createdDate: CURRENT_TIMESTAMP(),
                     json:	JSON.stringify(update_order),	
                     site:	store_id,
                     status:	'0',	
-                    entries: JSON.stringify(entries); 
+                    entries: JSON.stringify(entries),
                     cookingFinishTime: null,	
                     pickupFinishTime: null,	
                     cancelTime: null
