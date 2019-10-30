@@ -9,16 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetZone(args, function(err1, result) {
+          console.log('GetZone');
+          
+          if(!result.GetZoneResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetZoneResult);
+          }
+        });  
       }
-      client.GetZone(args, function(err1, result) {
-            console.log('GetZone');
-            
-            if(!result.GetZoneResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetZoneResult);
-            }
-      });  
   });
 }
 

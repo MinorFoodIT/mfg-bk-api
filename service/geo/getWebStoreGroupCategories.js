@@ -9,16 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetWebStoreGroupCategories(args, function(err1, result) {
+          console.log('GetWebStoreGroupCategories');
+          
+          if(!result.GetWebStoreGroupCategoriesResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetWebStoreGroupCategoriesResult);
+          }
+        }); 
       }
-      client.GetWebStoreGroupCategories(args, function(err1, result) {
-            console.log('GetWebStoreGroupCategories');
-            
-            if(!result.GetWebStoreGroupCategoriesResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetWebStoreGroupCategoriesResult);
-            }
-      });  
   });
 }
 

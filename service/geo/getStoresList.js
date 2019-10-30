@@ -9,17 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetStoresList(args, function(err1, result) {
+          if(!result.GetStoresListResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetStoresListResult);
+          }
+        }); 
       }
-      //console.log(client);
-      client.GetStoresList(args, function(err1, result) {
-            console.log('GetStoresList');
-            
-            if(!result.GetStoresListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetStoresListResult);
-            }
-      });  
   });
 }
 

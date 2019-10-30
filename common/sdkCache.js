@@ -1,3 +1,4 @@
+var logger = require('./logging/winston')(__filename);
 const uuidv4 = require('uuid/v4');
 const myCache = require('./nodeCache');
 const GetStoresAreaList = require('../service/geo/getStoresAreaList');
@@ -11,6 +12,7 @@ const GetWebCitiesList = require('./../service/geo/getWebCitiesList');
 const GetWebDistrictsList = require('./../service/geo/getWebDistrictsList');
 const GetWebStreetsList = require('./../service/geo/getWebStreetsList');
 const GetCompList = require('./../service/master/getCompList');
+
 
 async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
@@ -26,10 +28,10 @@ let funcStores = () => {
             language: 'En',
             conceptID: 2 //BK_TH
          }
-         console.log('Cache stores_area => start');
+         logger.info('Cache stores_area => start');
          GetStoresAreaList(get_store_args, function (err, sdkResponse) {
              if (err) {
-                 console.log('GetStoresAreaList error ' + err);
+                 logger.info('GetStoresAreaList error ' + err);
              }
              let stores = sdkResponse["CC_STORE_AREA"].map(store => {
                  return {
@@ -39,7 +41,7 @@ let funcStores = () => {
                  };
              });
              myCache.set("stores_area",stores);
-             console.log('Cache stores_area => finished');
+             logger.info('Cache stores_area => finished');
              resolve('funcStores');
          })
      })
@@ -51,14 +53,14 @@ let funcCountries = async () => {
 
 let funcProvinces = () => {
     return new Promise(resolve => {
-        console.log('Cache provinces => start');
+        logger.info('Cache provinces => start');
         GetProvincesList({
             licenseCode: process.env.LICENSECODE,
             requestID: uuidv4(),
             language: 'En'
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetProvincesList error ' + err);
+                logger.info('GetProvincesList error ' + err);
             }
             let provinces = sdkResponse["CC_PROVINCE"].map(store => {
                 return {
@@ -67,8 +69,8 @@ let funcProvinces = () => {
                 };
             });
             myCache.set("provinces",provinces);
-            //console.log(provinces);
-            console.log('Cache provinces => finished');
+            //logger.info(provinces);
+            logger.info('Cache provinces => finished');
             resolve('funcStores');
         })
     });
@@ -76,14 +78,14 @@ let funcProvinces = () => {
 
 let funcCities =  () => {
     return new Promise(resolve => {
-        console.log('Cache cities => start');
+        logger.info('Cache cities => start');
         GetCitiesList({
             licenseCode: process.env.LICENSECODE,
             requestID: uuidv4(),
             language: 'En'
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetCitiesList error ' + err);
+                logger.info('GetCitiesList error ' + err);
             }
             let cities = sdkResponse["CC_CITY"].map(store => {
                 return {
@@ -93,8 +95,8 @@ let funcCities =  () => {
                 };
             });
             myCache.set("cities",cities);
-            //console.log(cities);
-            console.log('Cache cities => finished');
+            //logger.info(cities);
+            logger.info('Cache cities => finished');
             resolve('funcCities');
         })
     });
@@ -102,14 +104,14 @@ let funcCities =  () => {
 
 let funcWebBuildType =  () => {
     return new Promise(resolve => {
-        console.log('Cache webBuildType => start');
+        logger.info('Cache webBuildType => start');
         GetWebBuildType({
             licenseCode: process.env.LICENSECODE,
             requestID:  uuidv4(),
             language: 'En'
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetWebBuildType error ' + err);
+                logger.info('GetWebBuildType error ' + err);
             }
             let buildType = sdkResponse["CC_WEB_BUILD_TYPE"].map(store => {
                 return {
@@ -119,8 +121,8 @@ let funcWebBuildType =  () => {
                 };
             });
             myCache.set("web_build_type",buildType);
-            //console.log(buildType);
-            console.log('Cache webBuildType => finished');
+            //logger.info(buildType);
+            logger.info('Cache webBuildType => finished');
             resolve('funcWebBuildType');
         })
     });
@@ -128,14 +130,14 @@ let funcWebBuildType =  () => {
 
 let funcWebAddressType = () => {
     return new Promise(resolve => {
-        console.log('Cache webAddressType => start');
+        logger.info('Cache webAddressType => start');
         GetWebAddresType({
             licenseCode: process.env.LICENSECODE,
             requestID:  uuidv4(),
             language: 'En'
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetWebAddresType error ' + err);
+                logger.info('GetWebAddresType error ' + err);
             }
             let addressType = sdkResponse["CC_WEB_ADDRESS_TYPE"].map(store => {
                 return {
@@ -147,8 +149,8 @@ let funcWebAddressType = () => {
                 };
             });
             myCache.set("web_address_type",addressType);
-            //console.log(addressType);
-            console.log('Cache webAddressType => finished');
+            //logger.info(addressType);
+            logger.info('Cache webAddressType => finished');
             resolve('funcWebAddressType');
         })
     });
@@ -156,14 +158,14 @@ let funcWebAddressType = () => {
 
 let funcWebCountries = () => {
     return new Promise(resolve => {
-        console.log('Cache webcountries => start');
+        logger.info('Cache webcountries => start');
         GetWebCountriesList({
             licenseCode: process.env.LICENSECODE,
             requestID:  uuidv4(),
             language: 'En'
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetWebCountriesList error ' + err);
+                logger.info('GetWebCountriesList error ' + err);
             }
             let web_countries = sdkResponse["CC_WEB_COUNTRY"].map(store => {
                 return {
@@ -172,8 +174,8 @@ let funcWebCountries = () => {
                 };
             });
             myCache.set("web_countries",web_countries);
-            //console.log(web_countries);
-            console.log('Cache webcountries => finished');
+            //logger.info(web_countries);
+            logger.info('Cache webcountries => finished');
             resolve('funcWebCountries');
         });
     });
@@ -181,14 +183,14 @@ let funcWebCountries = () => {
 
 let funcWebProvinces = () => {
     return new Promise(resolve => {
-        console.log('Cache webprovinces => start');
+        logger.info('Cache webprovinces => start');
         GetWebProvincesList({
             licenseCode: process.env.LICENSECODE,
             requestID:  uuidv4(),
             language: 'En'
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetWebProvincesList error ' + err);
+                logger.info('GetWebProvincesList error ' + err);
             }
             let web_provinces = sdkResponse["CC_WEB_PROVINCE"].map(store => {
                 return {
@@ -198,8 +200,8 @@ let funcWebProvinces = () => {
                 };
             });
             myCache.set("web_provinces",web_provinces);
-            //console.log(web_provinces);
-            console.log('Cache webprovinces => finished');
+            //logger.info(web_provinces);
+            logger.info('Cache webprovinces => finished');
             resolve('funcWebProvinces');
         });
     });
@@ -208,14 +210,14 @@ let funcWebProvinces = () => {
 
 let funcWebCities = () => {
     return new Promise(resolve => {
-        console.log('Cache webcities => start');
+        logger.info('Cache webcities => start');
         GetWebCitiesList({
             licenseCode: process.env.LICENSECODE,
             requestID:  uuidv4(),
             language: 'En'
         }, async function (err, sdkResponse){
             if (err) {
-                console.log('GetWebCitiesList error ' + err);
+                logger.info('GetWebCitiesList error ' + err);
             }
             let web_cities = sdkResponse["CC_WEB_CITY"].map(store => {
                 return {
@@ -226,13 +228,13 @@ let funcWebCities = () => {
                 };
             });
             myCache.set("web_cities",web_cities);
-            //console.log(web_cities.length);
-            console.log('Cache webcities => finished');
+            //logger.info(web_cities.length);
+            logger.info('Cache webcities => finished');
 
             let doneToLoadDistricts = false;
             let doneToLoadStreets = false;
             //Load district
-            console.log('Cache webDistricts=> start');
+            logger.info('Cache webDistricts=> start');
             let web_districts  = [];
             let loadingDistricts = async() => {
                 return await Promise.all(
@@ -247,7 +249,7 @@ let funcWebCities = () => {
                                         cityID: web["city_id"]
                                     },function (err, sdkResponse){
                                         if (err) {
-                                            console.log('GetWebDistrictsList error ' + err);
+                                            logger.info('GetWebDistrictsList error ' + err);
                                         }
                                         web_districts = sdkResponse["CC_WEB_DISTRICT"].map(store => {
                                             return {
@@ -257,7 +259,7 @@ let funcWebCities = () => {
                                                 city_id: store["DIS_CITYID"],
                                             };
                                         });
-                                        //console.log('Get WebDistricts => pushed');
+                                        //logger.info('Get WebDistricts => pushed');
                                         resolve('funcWebDistrictsList');
                                     });
                                 }); 
@@ -265,22 +267,22 @@ let funcWebCities = () => {
             }
            
             loadingDistricts().then(results =>{
-                console.log('Cache webDistricts=> finished');
+                logger.info('Cache webDistricts=> finished');
                 myCache.set("web_districts",web_districts);
                 
                 doneToLoadDistricts = true;
                 if(doneToLoadDistricts && doneToLoadStreets){
                     resolve('funcWebCities');
                 }else{
-                    console.log('waiting loadStreets()');
+                    logger.info('waiting loadStreets()');
                 }
             }).catch(err => {
-                console.log(err);
+                logger.info(err);
             });
 
 
             //Load webStreets
-            console.log('Cache webStreets=> start');
+            logger.info('Cache webStreets=> start');
             let web_streets  = [];
             let loadStreets = async() => {
                 //only one
@@ -295,7 +297,7 @@ let funcWebCities = () => {
                                     cityID: web["city_id"]
                                 },function (err, sdkResponse){
                                     if (err) {
-                                        console.log('GetWebStreetsList error ' + err);
+                                        logger.info('GetWebStreetsList error ' + err);
                                     }
                                     web_streets = sdkResponse["CC_WEB_STREET"].map(web => {
                                         return {
@@ -303,7 +305,7 @@ let funcWebCities = () => {
                                             street_name: web["STRET_NAME"]
                                         }
                                     })
-                                    //console.log('Get WebStreets => pushed');
+                                    //logger.info('Get WebStreets => pushed');
                                     resolve('funcWebStreetsList');
                                 });
                             }); 
@@ -312,18 +314,18 @@ let funcWebCities = () => {
                        
                 loadStreets()
                     .then(results =>{
-                        console.log('Cache webStreets=> finished');
+                        logger.info('Cache webStreets=> finished');
                         myCache.set("web_streets",web_streets);
-                        //console.log(myCache.get("web_streets"));
-                        //console.log(myCache.get("web_streets")[1]);
+                        //logger.info(myCache.get("web_streets"));
+                        //logger.info(myCache.get("web_streets")[1]);
                         doneToLoadStreets = true;
                         if( doneToLoadStreets && doneToLoadDistricts){
                             resolve('funcWebCities');
                         }else{
-                            console.log('waiting loadingDistricts()');
+                            logger.info('waiting loadingDistricts()');
                         }
                     }).catch(err => {
-                        console.log(err);
+                        logger.info(err);
                     });
         });
     });
@@ -331,7 +333,7 @@ let funcWebCities = () => {
 
 let funcCompList = () => {
     return new Promise(resolve => {
-        console.log('Cache comp => start');
+        logger.info('Cache comp => start');
         GetCompList({
             licenseCode: process.env.LICENSECODE,
             requestID:  uuidv4(),
@@ -340,7 +342,7 @@ let funcCompList = () => {
             menuTemplateID: 10
         },function (err, sdkResponse){
             if (err) {
-                console.log('GetCompList error ' + err);
+                logger.info('GetCompList error ' + err);
             }
             let web_comp = sdkResponse["CComp"].map(store => {
                 return {
@@ -356,17 +358,16 @@ let funcCompList = () => {
                 return String(comp["name"]) === String('Disc 50B')
             });
             myCache.set("web_comp",web_comp);
-            console.log(web_comp);
-            console.log('Cache comp => finished');
+            logger.info(web_comp);
+            logger.info('Cache comp => finished');
             resolve('funcCompList');
         });
     });
 }
 
 let loadingFirst = async() =>{
-    console.log('[Cache] load '+new Date());
+    logger.info('[Cache] load '+new Date());
     return await Promise.all([
-        //console.log('test')
         funcStores(),
         funcProvinces(),
         funcCities(),

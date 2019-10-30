@@ -9,16 +9,16 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetDistrictsList(args, function(err1, result) {      
+          if(!result.GetDistrictsListResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetDistrictsListResult);
+          }
+        });  
       }
-      client.GetDistrictsList(args, function(err1, result) {
-            //console.log('GetDistrictsList');
-            
-            if(!result.GetDistrictsListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetDistrictsListResult);
-            }
-      });  
+      
   });
 }
 

@@ -9,16 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetWebBuildTypeList(args, function(err1, result) {
+              if(!result.GetWebBuildTypeListResult){
+                cb(err1,result.SDKResult);
+              }else{
+                cb(err1,result.GetWebBuildTypeListResult);
+              }
+        });  
       }
-      client.GetWebBuildTypeList(args, function(err1, result) {
-            //console.log('GetWebBuildTypeList');
-            
-            if(!result.GetWebBuildTypeListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetWebBuildTypeListResult);
-            }
-      });  
   });
 }
 

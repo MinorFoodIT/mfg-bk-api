@@ -9,16 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetWebAddressTypeList(args, function(err1, result) {
+          console.log('GetWebAddressTypeList');
+          
+          if(!result.GetWebAddressTypeListResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetWebAddressTypeListResult);
+          }
+        });  
       }
-      client.GetWebAddressTypeList(args, function(err1, result) {
-            console.log('GetWebAddressTypeList');
-            
-            if(!result.GetWebAddressTypeListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetWebAddressTypeListResult);
-            }
-      });  
   });
 }
 

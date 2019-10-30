@@ -9,16 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetWebProvincesList(args, function(err1, result) {
+          //console.log('GetWebProvincesList');
+          
+          if(!result.GetWebProvincesListResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetWebProvincesListResult);
+          }
+        }); 
       }
-      client.GetWebProvincesList(args, function(err1, result) {
-            //console.log('GetWebProvincesList');
-            
-            if(!result.GetWebProvincesListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetWebProvincesListResult);
-            }
-      });  
   });
 }
 

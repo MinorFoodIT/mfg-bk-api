@@ -9,18 +9,19 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        //client.GetCustomerByEmail
+        //client.GetCustomerMin
+        client.RegisterAddress(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
+          console.log('RegisterAddressResult');
+          
+          if(!result.RegisterAddressResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.RegisterAddressResult);
+          }
+        });  
       }
-      //client.GetCustomerByEmail
-      //client.GetCustomerMin
-      client.RegisterAddress(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
-            console.log('RegisterAddressResult');
-            
-            if(!result.RegisterAddressResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.RegisterAddressResult);
-            }
-      });  
   });
 }
 

@@ -9,16 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetWebCountriesList(args, function(err1, result) {
+          if(!result.GetWebCountriesListResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetWebCountriesListResult);
+          }
+        }); 
       }
-      client.GetWebCountriesList(args, function(err1, result) {
-            //console.log('GetWebCountriesList');
-            
-            if(!result.GetWebCountriesListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetWebCountriesListResult);
-            }
-      });  
   });
 }
 

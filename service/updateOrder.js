@@ -9,20 +9,21 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.UpdateOrder(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
+          // console.log('UpdateOrder');
+          // console.log(args);
+          // console.log(rawRequest);
+          // console.log(result);
+          if(!result.UpdateOrderResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.UpdateOrderResult);
+          }     
+        },{postProcess: function(_xml) {
+          return _xml.replace('</q176:Entries><q176:Entries>', '');
+        }}); 
       }
-      client.UpdateOrder(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
-            console.log('UpdateOrder');
-            console.log(args);
-            console.log(rawRequest);
-            console.log(result);
-            if(!result.UpdateOrderResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.UpdateOrderResult);
-            }     
-      },{postProcess: function(_xml) {
-        return _xml.replace('</q176:Entries><q176:Entries>', '');
-      }});  
   });
 }
 

@@ -9,17 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.ActiveCustomerAccount(args, function(err1, result) { 
+          if(!result.ActiveCustomerAccountResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.ActiveCustomerAccountResult);
+          }
+        }); 
       }
-
-      client.ActiveCustomerAccount(args, function(err1, result) {
-            //console.log('ActiveCustomerAccount');
-            
-            if(!result.ActiveCustomerAccountResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.ActiveCustomerAccountResult);
-            }
-      });  
   });
 }
 

@@ -1,6 +1,7 @@
 const configEnv = require('dotenv').config()
 var soap = require('soap');
 var url = process.env.SDK_URL;
+const uuidv4 = require('uuid/v4');
 
 module.exports = function(stores,cb) {
   soap.createClient(url ,{
@@ -9,37 +10,36 @@ module.exports = function(stores,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
-      }
-      console.log('getAreaAllStore');
-      console.log('soap client created');
-      cb(err,stores.map( async store => {
-       console.log('map => '+store["area_id"] );
-       
-       return await client.GetArea({
-              licenseCode: process.env.LICENSECODE,
-              requestID: '201909171328',
-              language: 'En',
-              areaID: store["area_id"]
-            }, function(err1, result) {
-              console.log('return map => '+store["area_id"] );
-              console.log(result);
-              if(result.GetAreaResult){
-                return store;
-              }else{
-                return { 
-                  store_id : store["store_id"],
-                  area_id : store["area_id"],
-                  area_name : area["AREA_NAME"],
-                  zone_id : store["zone_id"],
-                  distinct_id : area["AREA_DEF_DISTRICTID"],
-                  street_id : area["AREA_DEF_STREETID"],
-                  province_id : area["AREA_PROVINCEID"],
-                  city_id : area["AREA_CITYID"],
-                  country_id : area["AREA_COUNTRYID"],
+      }else{
+        cb(err,stores.map( async store => {
+         console.log('map => '+store["area_id"] );
+         
+         return await client.GetArea({
+                licenseCode: process.env.LICENSECODE,
+                requestID: uuidv4(),
+                language: 'En',
+                areaID: store["area_id"]
+              }, function(err1, result) {
+                //console.log('return map => '+store["area_id"] );
+                //console.log(result);
+                if(result.GetAreaResult){
+                  return store;
+                }else{
+                  return { 
+                    store_id : store["store_id"],
+                    area_id : store["area_id"],
+                    area_name : area["AREA_NAME"],
+                    zone_id : store["zone_id"],
+                    distinct_id : area["AREA_DEF_DISTRICTID"],
+                    street_id : area["AREA_DEF_STREETID"],
+                    province_id : area["AREA_PROVINCEID"],
+                    city_id : area["AREA_CITYID"],
+                    country_id : area["AREA_COUNTRYID"],
+                  }
                 }
-              }
-            });
-        }))
+              });
+          }))
+      }
     });
 }
 

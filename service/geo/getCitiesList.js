@@ -9,16 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetCitiesList(args, function(err1, result) {
+          if(!result.GetCitiesListResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetCitiesListResult);
+          }
+        });  
       }
-      client.GetCitiesList(args, function(err1, result) {
-            //console.log('GetCitiesList');
-            
-            if(!result.GetCitiesListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetCitiesListResult);
-            }
-      });  
   });
 }
 

@@ -9,17 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.IsCustomerUserNameOrEmailUsed(args, function(err1, result) {
+          if(!result.IsCustomerUserNameOrEmailUsedResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.IsCustomerUserNameOrEmailUsedResult);
+          }
+        }); 
       }
-
-      client.IsCustomerUserNameOrEmailUsed(args, function(err1, result) {
-            //console.log('IsCustomerUserNameOrEmailUsed');
-            
-            if(!result.IsCustomerUserNameOrEmailUsedResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.IsCustomerUserNameOrEmailUsedResult);
-            }
-      });  
   });
 }
 

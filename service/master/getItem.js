@@ -9,16 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetItem(args, function(err1, result) {
+          console.log('GetItemResult');
+          
+          if(!result.GetItemResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetItemResult);
+          }
+        });  
       }
-      client.GetItem(args, function(err1, result) {
-            console.log('GetItemResult');
-            
-            if(!result.GetItemResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetItemResult);
-            }
-      });  
   });
 }
 

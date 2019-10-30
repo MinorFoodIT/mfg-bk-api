@@ -9,18 +9,19 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        //client.GetCustomerByEmail
+        //client.GetCustomerMin
+        client.GetCustomerByID(args, function(err1, result) {
+          //console.log('GetCustomerByIDResult');
+          
+          if(!result.GetCustomerByIDResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetCustomerByIDResult);
+          }
+        }); 
       }
-      //client.GetCustomerByEmail
-      //client.GetCustomerMin
-      client.GetCustomerByID(args, function(err1, result) {
-            //console.log('GetCustomerByIDResult');
-            
-            if(!result.GetCustomerByIDResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetCustomerByIDResult);
-            }
-      });  
   });
 }
 

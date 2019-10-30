@@ -7,6 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('http:api');
 var http = require('http');
+var logger = require('./../common/logging/winston')(__filename);
+
 //var cacheMongod = require('../cache-mongo'); //init cache created and mongoose connection loaded
 var database = require('./../common/database/auth-db');
 database.createUsersTable(() => {});
@@ -31,12 +33,14 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
 sdkCache.then(started =>{
-  console.log('[Cache] statistics');
-  console.log(nodeCache.getStats());
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
+  logger.info('[Cache] statistics');
+  logger.info(nodeCache.getStats());
+  logger.info('- - - - - - - - - -');
 });
 
 
@@ -99,7 +103,7 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-  console.log('[Server] started '+new Date());
+  logger.info('[Server] started '+new Date());
 }
 
 

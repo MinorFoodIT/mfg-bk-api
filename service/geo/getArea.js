@@ -9,17 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetArea(args, function(err1, result) {
+          console.log('GetArea');
+          
+          if(!result.GetAreaResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetAreaResult);
+          }
+        });  
       }
-      //console.log(client);
-      client.GetArea(args, function(err1, result) {
-            console.log('GetArea');
-            
-            if(!result.GetAreaResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetAreaResult);
-            }
-      });  
   });
 }
 

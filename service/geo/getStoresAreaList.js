@@ -9,9 +9,9 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
-      }
-      //console.log(client);
-      client.GetStoresAreaList(args, function(err1, result) {
+      }else{
+        if(client !== 'undefined'){
+          client.GetStoresAreaList(args, function(err1, result) {
             console.log('GetStoresAreaList');
             
             if(!result.GetStoresAreaListResult){
@@ -19,7 +19,9 @@ module.exports = function(args,cb) {
             }else{
               cb(err1,result.GetStoresAreaListResult);
             }
-      });  
+           });  
+        }
+      }
   });
 }
 

@@ -1,4 +1,5 @@
 var path = require('path');
+var logger = require('./../../common/logging/winston')(__filename);
 const uuidv4 = require('uuid/v4');
 const series = require('async/series');
 const waterfall = require('async/waterfall');
@@ -19,8 +20,6 @@ var myCache = require('../../common/nodeCache');
 var mysqldb = require('../../common/mysql-client');
 
 //SDK Service
-//const GetStoresAreaList = require('../../service/geo/getStoresAreaList');
-//const GetAreaAllStore = require('../../service/geo/getAreaAllStoretore');
 const GetArea = require('../../service/geo/getArea');
 const IsCustomerUserNameOrEmailUsed = require('../../service/profile/IsCustomerUserNameOrEmailUsed');
 const RegisterCustomer = require('../../service/profile/registerCustomer');
@@ -30,6 +29,7 @@ const RegisterAddress = require('../../service/profile/registerAddress');
 const GetCustomerAddresses = require('../../service/profile/getCustomerAddresses');
 const UpdateOrder = require('../../service/updateOrder');
 const GetStore = require('../../service/geo/getStore');
+const GetOrderDetails = require('../../service/order/GetOrderDetails');
 const {entry_status ,entry_type} = require('./enums');
 
 
@@ -47,8 +47,8 @@ let checktoken =  (req,res,next) => {
             if (err) {
               return res.status(401).json((new APIError('Token is not valid : '+err.message,401,true)).returnJson());
             } else {
-              console.log('Token decoded :');
-              console.log(decoded);
+              //logger.info('Token decoded :');
+              //logger.info(decoded);
               req.decoded = decoded;
               next();
             }
@@ -74,10 +74,10 @@ router.get('/store', async (req, res) => {
     storeID: req.query.id
   },function(err,sdkResponse){
     if(err){
-      console.log('error at /area '+err);
-      res.json((new APIError('Could not find the area',404,true)).returnJson());
+      logger.info('error at /area '+err);
+      res.status(404).json((new APIError('Could not find the area',404,true)).returnJson());
     }
-    res.json(new APIResponse('getArea' ,200 ,sdkResponse ));
+    res.status(200).json(new APIResponse('getArea' ,200 ,sdkResponse ));
   })
 });
 
@@ -110,15 +110,15 @@ router.get('/store_assign/geocode', async (req, res) => {
           let data = resp.data;
           try{
             let store1112 = data["status"] === 404 ?[]:data["1112DL"]["brands"]["BK"];
-            res.json(new APIResponse('geocode' ,200,store1112));
+            res.status(200).json(new APIResponse('geocode',200,store1112));
           }catch(err){
-            console.log(err.message);
-            res.json((new APIError('Could not find a store',404,true)).returnJson());
+            logger.info(err.message);
+            res.status(404).json((new APIError('Could not find a store',404,true)).returnJson());
           }
         })
         .catch((err) => {
-          console.log(err.message);
-          res.json((new APIError('Could not find a store',404,true)).returnJson());
+          logger.info(err.message);
+          res.status(404).json((new APIError('Could not find a store',404,true)).returnJson());
         })
 });
 
@@ -145,25 +145,25 @@ router.get('/store_area_zone/store', async (req, res) => {
       let storesArea = cacheStoresArea.filter(area => {
         return String(area["store_id"]) === String(id);
       });
-      res.json(new APIResponse('getStoreAreaZone' ,200,storesArea));
+      res.status(200).json(new APIResponse('getStoreAreaZone' ,200,storesArea));
     }catch(err){
-      console.log(err.message);
-      res.json((new APIError('Could not find any area and zone',404,true)).returnJson());
+      logger.info(err.message);
+      res.status(404).json((new APIError('Could not find any area and zone',404,true)).returnJson());
     }
   });
 
 /**
  * Get store area list
  */
-router.get('/store_area_zone/all', async (req, res) => {
-  res.json(new APIResponse('getStoreAreaZone' ,200,myCache.get("stores_area")));
+router.get('/store_area_zone', async (req, res) => {
+  res.status(200).json(new APIResponse('getStoreAreaZone' ,200,myCache.get("stores_area")));
 });
 
 /**
  * Get discount
  * 
  */
-router.get('/discount', async (req, res) => {
+router.get('/discounts', async (req, res) => {
   let web_comp = myCache.get("web_comp");
   let return_comp = web_comp.map(comp => {
     return {
@@ -171,7 +171,7 @@ router.get('/discount', async (req, res) => {
       discount_name: comp["name"]
     };
   });
-  res.json(new APIResponse('getDiscount' ,200 , return_comp));
+  res.status(200).json(new APIResponse('getDiscount' ,200 , return_comp));
 })
 
 /**
@@ -201,36 +201,36 @@ router.get('/area', async (req, res) => {
   }
   GetArea(get_area_args,function(err,sdkResponse){
     if(err){
-        console.log('error at /area '+err);
-        res.json((new APIError('Could not find the area',404,true)).returnJson());
+        logger.info('error at /area '+err);
+        res.status(400).json((new APIError('Could not find the area',404,true)).returnJson());
     }
     
-    //console.log(myCache.keys());
+    //logger.info(myCache.keys());
     let web_city = myCache.get("web_cities").filter(web =>{
       return String(web["city_id"]) === String(sdkResponse["AREA_CITYID"])
     });
-    console.log('web_city :');
-    console.log(web_city);
+    logger.info('web_city :');
+    logger.info(web_city);
 
     let web_province = myCache.get("web_provinces").filter(web =>{
       return String(web["province_id"]) === String(sdkResponse["AREA_PROVINCEID"])
     });
-    console.log('web_province :');
-    console.log(web_province);
+    logger.info('web_province :');
+    logger.info(web_province);
 
     let web_distrinct = myCache.get("web_districts").filter(web =>{
       return String(web["distinct_id"]) === String(sdkResponse["AREA_DEF_DISTRICTID"])
     });
-    console.log('web_distrinct :');
-    console.log(web_distrinct);
+    logger.info('web_distrinct :');
+    logger.info(web_distrinct);
 
     let web_street = myCache.get("web_streets").filter(web =>{
       return String(web["street_id"]) === String(sdkResponse["AREA_DEF_STREETID"])
     });
-    console.log('web_street :');
-    console.log(web_street);
+    logger.info('web_street :');
+    logger.info(web_street);
 
-    res.json(new APIResponse('getArea' ,200 , {
+    res.status(200).json(new APIResponse('getArea' ,200 , {
       "AREA_ID": sdkResponse["AREA_ID"],
       "AREA_NAME": sdkResponse["AREA_NAME"],
       "AREA_PROVINCEID" : sdkResponse["AREA_PROVINCEID"],
@@ -287,9 +287,9 @@ router.post('/registercustomer', (req, res) => {
     //to do :check exist customer on db
     
     let sdmEmailMap =  uuidv4() + '@burgerking.co.th'; //'9987654321'
-    console.log('Will create :');
-    console.log(sdmEmailMap);
-    console.log(password);
+    logger.info('Will create :');
+    logger.info(sdmEmailMap);
+    logger.info(password);
     
     let request = {
       licenseCode: process.env.LICENSECODE,
@@ -300,11 +300,11 @@ router.post('/registercustomer', (req, res) => {
 
     IsCustomerUserNameOrEmailUsed(request,function(err,sdkResponse){
       if(err){
-          console.log('error at /regiscustomer '+err);
-          res.json((new APIError('Customer value is invalid',500,true)).returnJson());
+          logger.info('error at /regiscustomer '+err);
+          res.status(500).json((new APIError('Customer value is invalid',500,true)).returnJson());
       }
       if(sdkResponse === 'NOT_FOUND'){
-        console.log('Can be create new customer');
+        logger.info('Can be create new customer');
         //Creaate a new customer
         let sdkCreatedDate = moment().format("YYYY-MM-DDTHH:mm:ss");
         let createdDate = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -334,7 +334,7 @@ router.post('/registercustomer', (req, res) => {
           'q13:WCUST_OFFER2': offer2,
           'q13:WCUST_STATUS': 1 //Pending = 1 ,Active =2
         }
-        console.log({
+        logger.info({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
           language: 'Th',
@@ -349,26 +349,26 @@ router.post('/registercustomer', (req, res) => {
               'tns:customer': customer
             },function(err,sdkResponse){
               if(err){
-                console.log('RegisterCustomer error :' +err);
-                console.log(sdkResponse);
+                logger.info('RegisterCustomer error :' +err);
+                logger.info(sdkResponse);
                 callback(err,null);
               }
-              console.log('Webservice result RegisterCustomer :');
-              console.log(sdkResponse);
+              logger.info('Webservice result RegisterCustomer :');
+              logger.info(sdkResponse);
               callback(null,sdkResponse);
             });
             
           },
           function(regisCustomer,callback){
             //To do : save custeomer to db
-            console.log('To do save to db');
+            logger.info('To do save to db');
             mysqldb((err,connection) => {
               if(err){
-                  console.log('[Connecttion database error] '+err)
+                  logger.info('[Connecttion database error] '+err)
                   callback(err,null);
               }
 
-              console.log('[INSERT Customer data] '+ regisCustomer["CUST_ID"])
+              logger.info('[INSERT Customer data] '+ regisCustomer["CUST_ID"])
               var custData  = {
                 customerID: regisCustomer["CUST_ID"],
                 corpID: regisCustomer["CUST_CORPID"],
@@ -397,7 +397,7 @@ router.post('/registercustomer', (req, res) => {
               };
               connection.query('INSERT into customers SET ?', custData ,function (error, results, fields){
                   if (error) {
-                      console.log('[Insert database error] '+error);
+                      logger.info('[Insert database error] '+error);
                       callback(error,null);
                   };
                   connection.release()
@@ -415,12 +415,12 @@ router.post('/registercustomer', (req, res) => {
                 conceptID: 2
               },function(err,sdkResponse){
                 if(err){
-                  console.log('ActiveCustomerAccount error :' +err);
+                  logger.info('ActiveCustomerAccount error :' +err);
                   callback(err,null);
                 }
 
-                console.log('Webservice result ActiveCustomerAccount :');
-                console.log(sdkResponse);
+                logger.info('Webservice result ActiveCustomerAccount :');
+                logger.info(sdkResponse);
 
                 //To do : token
                 let userToken = jwt.sign({
@@ -445,12 +445,12 @@ router.post('/registercustomer', (req, res) => {
                   register_id : decoded["CUST_CORPID"],
                   token: userToken
                 }));
-                console.log(userToken);
+                logger.info(userToken);
               }) 
             }
         })
       }else{
-        res.json((new APIError('Customer is exists',500,true)).returnJson());
+        res.status(500).json((new APIError('Customer is exists',500,true)).returnJson());
       }
 
     })
@@ -491,8 +491,8 @@ router.get('/customer', (req ,res) => {
     conceptID: 2
   },function(err,sdkResponse){
     if(err){
-        console.log('error at /customer '+err);
-        res.json((new APIError('Could not find the customer',404,true)).returnJson());
+        logger.info('error at /customer '+err);
+        res.status(404),json((new APIError('Could not find the customer',404,true)).returnJson());
     }
 
     let userToken = jwt.sign({
@@ -503,7 +503,7 @@ router.get('/customer', (req ,res) => {
       CUST_CORPID: sdkResponse["CUST_CORPID"]
      }, SECRET_KEY);
 
-    res.json(new APIResponse('getCustomer' ,200 , {
+    res.status(200).json(new APIResponse('getCustomer' ,200 , {
       "register_id": sdkResponse["CUST_CORPID"],
       "customer_id": sdkResponse["CUST_ID"],
       "create_date" : sdkResponse["CRT_DATE"],
@@ -535,7 +535,7 @@ router.post('/search/address', (req ,res) => {
   .then(decoded => {
     let decodedToken = decoded[0];
     if(!helper.isNullEmptry(decodedToken.error)){
-      return res.json((new APIError('Error /address : '+decodedToken.error.message,500,true)).returnJson());
+      return res.status(500).json((new APIError('Error /address : '+decodedToken.error.message,500,true)).returnJson());
     }else{
       let customer = decodedToken.customer;
       GetCustomerAddresses({
@@ -549,15 +549,15 @@ router.post('/search/address', (req ,res) => {
         to: 1000
       },function(err,sdkResponse){
         if(err){
-          console.log('Error SDK GetCustomerAddress : '+err);
-          return res.json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
+          logger.info('Error SDK GetCustomerAddress : '+err);
+          return res.status(500).json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
         }
 
         if(sdkResponse["CC_ADDRESS"]){
-          console.log('found addresses to set a object');
+          logger.info('found addresses to set a object');
           let address = [...sdkResponse["CC_ADDRESS"]];
           let addressFound = address.filter(addr => {
-            console.log(addr["WADDR_NAME"]);
+            logger.info(addr["WADDR_NAME"]);
             return String(addr["WADDR_NAME"]) === String(address_name) && !String(addr["WADDR_NAME"]).includes('[WEB DELETE]');
           })
           if(addressFound.length > 0){
@@ -565,24 +565,24 @@ router.post('/search/address', (req ,res) => {
             let store_id = '';
             let area_id = addr["ADDR_AREAID"];
             let address_id = addr["ADDR_ID"]
-            console.log('find address_id '+addr);
+            logger.info('find address_id '+addr);
             mysqldb((err,connection) => {
               if(err){
-                  console.log('[Connecttion database error] '+err)
-                  return res.json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
+                  logger.info('[Connecttion database error] '+err)
+                  return res.status(500).json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
               }else{
                 connection.query('SELECT storeID from address where addressID = ?', [address_id] ,function (error, results, fields){
                   if (error) {
-                      console.log('[Select database error] '+error);
-                      return res.json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
+                      logger.info('[Select database error] '+error);
+                      return res.status(500).json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
                   };
-                  console.log(results);
+                  logger.info(results);
                   if(results.length > 0){
                     let row = results[0];
                     store_id = row.storeID;
                   }
                   connection.release()
-                  res.json(new APIResponse('getAddress' ,200 , {
+                  res.status(200).json(new APIResponse('getAddress' ,200 , {
                     address_id : address_id,
                     store_id : store_id,
                     area_id : area_id
@@ -593,15 +593,15 @@ router.post('/search/address', (req ,res) => {
           
           }else{
             //No found
-            return res.json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
+            return res.status(500).json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
           }
         }
       });
     }
   })
   .catch(err =>{
-    console.log('[Catch error] '+err)
-    return res.json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
+    logger.info('[Catch error] '+err)
+    return res.status(500).json((new APIError('Error /address : could not find address name'.message,500,true)).returnJson());
   })
 })
 
@@ -669,7 +669,7 @@ router.post('/registeraddress', (req, res) => {
       },
       //Step :: 2 ==> lookup customer 
       function(requestCustomer,callback){
-        console.log('Get customer by id');
+        logger.info('Get customer by id');
         GetCustomerByID({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
@@ -678,7 +678,7 @@ router.post('/registeraddress', (req, res) => {
           conceptID: 2
         },function(err,sdkResponse){
             if(err){
-                console.log('Error GetCustomerByID : '+err);
+                logger.info('Error GetCustomerByID : '+err);
                 callback(err,null);
             }
             if(sdkResponse["CUST_ID"]){
@@ -688,7 +688,7 @@ router.post('/registeraddress', (req, res) => {
         });
       },
       function(customer,callback){
-          console.log('register address to order ');
+          logger.info('register address to order ');
           let sketch = 'อาคาร/หมู่บ้าน: '+ helper.isNullEmptry(build_name)?'-':build_name +
           'เลขที่: '+ helper.isNullEmptry(build_number)?'-':build_number +
           'ชั้น: '+ helper.isNullEmptry(floor)?'-':floor +
@@ -778,7 +778,7 @@ router.post('/registeraddress', (req, res) => {
             'q16:WADDR_SUBDISTRICT_TEXT': subdistrict,
             'q16:WADDR_TYPE': '1',
           }
-          console.log('RegisterAddress to sdk');
+          logger.info('RegisterAddress to sdk');
           RegisterAddress({
             'tns:licenseCode': process.env.LICENSECODE,
             'tns:requestID': uuidv4(),
@@ -789,7 +789,7 @@ router.post('/registeraddress', (req, res) => {
             'tns:address': cc_address
           },function(err,sdkResponse){
             if(err){
-              console.log('Error RegisterAddress : '+err);
+              logger.info('Error RegisterAddress : '+err);
               callback(err,null);
             }
             if(!helper.isNullEmptry(sdkResponse["ADDR_CUSTID"])){
@@ -798,11 +798,11 @@ router.post('/registeraddress', (req, res) => {
               //To do : save address
               mysqldb((err,connection) => {
                 if(err){
-                    console.log('[Connecttion database error] '+err)
+                    logger.info('[Connecttion database error] '+err)
                     callback(err,null);
                 }
   
-                console.log('[INSERT Address data] '+ address["ADDR_ID"])
+                logger.info('[INSERT Address data] '+ address["ADDR_ID"])
                 var addressData  = {
                   webcustomerID: address["ADDR_CUSTID"],
                   customerID: address["ADDR_CUSTID"],
@@ -834,7 +834,7 @@ router.post('/registeraddress', (req, res) => {
                 };
                 connection.query('INSERT into address SET ?', addressData ,function (error, results, fields){
                     if (error) {
-                        console.log('[Insert database error] '+error);
+                        logger.info('[Insert database error] '+error);
                         callback(error,null);
                     };
                     connection.release()
@@ -847,18 +847,16 @@ router.post('/registeraddress', (req, res) => {
       }
     ],function(err,jsonReturn){
       if(err){
-        res.json((new APIError('Error customer address : '+err,500,true)).returnJson());
+        res.status(500).json((new APIError('Error customer address : '+err,500,true)).returnJson());
       }
       if(jsonReturn["ADDR_ID"]){
-        res.json(new APIResponse('registeraddress' ,200,{
+        res.status(200).json(new APIResponse('registeraddress' ,200,{
           address_id : jsonReturn["ADDR_ID"],
           create_date : jsonReturn["CRT_DATE"]
         }));
       }else{
-        res.json((new APIError('Error customer address : '+'can not create address',500,true)).returnJson());
-      }
-
-     
+        res.status(500).json((new APIError('Error customer address : '+'can not create address',500,true)).returnJson());
+      }     
     });
 
   }catch(err){
@@ -923,7 +921,7 @@ router.post('/createorder', (req, res) => {
     waterfall([
        //Step :: 1 => check store_id
        function(callback){
-        console.log('[Step1] GetStore->store_id'); 
+        logger.info('[Step1] GetStore->store_id'); 
         GetStore({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
@@ -931,12 +929,12 @@ router.post('/createorder', (req, res) => {
           storeID: store_id
         },function(err,sdkResponse){
           if(err){
-            console.log('Error SDK GetStore : '+err);
+            logger.info('Error SDK GetStore : '+err);
             return callback(err,null);
           }
           if(sdkResponse["ResultCode"]){
             if(String(sdkResponse["ResultCode"]).includes('No_Store_Found')){
-              console.log('Error SDK GetStore : '+sdkResponse["ResultCode"]);
+              logger.info('Error SDK GetStore : '+sdkResponse["ResultCode"]);
               return callback(sdkResponse["ResultCode"],null);
             }  
           }
@@ -944,13 +942,13 @@ router.post('/createorder', (req, res) => {
           //No check payment with card
 
           if(sdkResponse["STR_ID"]){
-            //console.log(sdkResponse);
-            //console.log(Boolean(sdkResponse["STR_ISACTIVE"]));
+            //logger.info(sdkResponse);
+            //logger.info(Boolean(sdkResponse["STR_ISACTIVE"]));
             if(helper.isNullEmptry(sdkResponse["STR_ISACTIVE"]) || !Boolean(sdkResponse["STR_ISACTIVE"]) ){
               return callback('ขออภัย สถานที่ของคุณอยู่นอกเขตพื้นที่จัดส่ง',null);
             }
 
-            console.log('found store : '+sdkResponse["STR_NAME"]);
+            logger.info('found store : '+sdkResponse["STR_NAME"]);
             store_name = sdkResponse["STR_NAME"];
             switch(sdkResponse["STR_STATUS"])
             {
@@ -973,22 +971,22 @@ router.post('/createorder', (req, res) => {
       },
       //Step :: 2 => decode token to customer object
       function(store_ok,callback){
-        console.log('[Step2] CustToken->decode'); 
+        logger.info('[Step2] CustToken->decode'); 
         decodeCustoken(cusToken,SECRET_KEY)
         .then(decoded => {
           let decodedToken = decoded[0];
           if(!helper.isNullEmptry(decodedToken.error)){
             return callback(decodedToken.error.message,null);
           }else{
-            console.log('decoded : '+decodedToken.customer); 
-            console.log('ordering method : '+order_method);
+            logger.info('decoded : '+decodedToken.customer); 
+            logger.info('ordering method : '+order_method);
             if(order_method === 'future'){
               //To do check order date and last order date
   
             }else{
-              console.log((new Date()).getHours());
+              logger.info((new Date()).getHours());
               if(parseInt((new Date()).getHours()) < 9  && (true || 'check blacklist'.length > 0) ){
-                console.log('Order - Check Store: Check Store Open at 10 AM.');
+                logger.info('Order - Check Store: Check Store Open at 10 AM.');
                 return callback('ขออภัย ขณะนี้เป็นเวลาปิดให้บริการจัดส่ง',null);
               }
             }
@@ -996,14 +994,14 @@ router.post('/createorder', (req, res) => {
           }
         })
         .catch(err => {
-          console.log('[Decode token catch] '+ err);
+          logger.info('[Decode token catch] '+ err);
           return res.status(401).json((new APIError('Token is not valid : '+err,401,true)).returnJson());
         })
       },
       //Step :: 3 ==> lookup customer 
       function(requestCustomer,callback){
-        console.log('[Step3] GetCustomerByID->cust_id'); 
-        console.log('GET customer with cust_id = '+requestCustomer["CUST_ID"]);
+        logger.info('[Step3] GetCustomerByID->cust_id'); 
+        logger.info('GET customer with cust_id = '+requestCustomer["CUST_ID"]);
         GetCustomerByID({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
@@ -1012,11 +1010,11 @@ router.post('/createorder', (req, res) => {
           conceptID: 2
         },function(err,sdkResponse){
             if(err){
-                console.log('Error SDK GetCustomerByID : '+err);
+                logger.info('Error SDK GetCustomerByID : '+err);
                 callback(err,null);
             }
             if(sdkResponse["CUST_ID"]){
-              console.log('found customer to set a object');
+              logger.info('found customer to set a object');
               let customer = {...sdkResponse};
               callback(null,customer);
             }
@@ -1024,8 +1022,8 @@ router.post('/createorder', (req, res) => {
       },
       //Step :: 4 check customer address is [WEB DELETE]
       function(customer,callback){
-        console.log('[Step4] GetCustomerAddresses->username,password'); 
-        console.log('GET customer address ,username = '+customer["USERNAME"]);
+        logger.info('[Step4] GetCustomerAddresses->username,password'); 
+        logger.info('GET customer address ,username = '+customer["USERNAME"]);
         GetCustomerAddresses({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
@@ -1037,36 +1035,36 @@ router.post('/createorder', (req, res) => {
           to: 1000
         },function(err,sdkResponse){
           if(err){
-            console.log('Error SDK GetCustomerAddress : '+err);
+            logger.info('Error SDK GetCustomerAddress : '+err);
             callback(err,null);
           }
           let ordering_phoneNumber = '';
           if(sdkResponse["CC_ADDRESS"]){
-            console.log('found addresses to set a object');
+            logger.info('found addresses to set a object');
             let address = [...sdkResponse["CC_ADDRESS"]];
             let addressFound = address.filter(addr => {
               //return true;
               return String(addr["ADDR_ID"]) === String(address_id) && !String(addr["WADDR_NAME"]).includes('[WEB DELETE]');
             })
-            //console.log('[found] address no. : '+addressFound.length);
-            //console.log(addressFound);
+            //logger.info('[found] address no. : '+addressFound.length);
+            //logger.info(addressFound);
 
             if(addressFound.length === 0){
-              console.log('Do not find address with addr_id '+address_id + ' or address was deleted.');
+              logger.info('Do not find address with addr_id '+address_id + ' or address was deleted.');
               callback('Customer address does not exist or deleted',null);
             }else{
               let addr = addressFound[0]
               area_id = addr["ADDR_AREAID"];
-              console.log('Set area_id : '+ area_id);
+              logger.info('Set area_id : '+ area_id);
 
               //Check phone number
               if(shipping_method === 'delivery'){
-                console.log('To do delivery information');
+                logger.info('To do delivery information');
                 if(helper.isNullEmptry(addr["ADDR_PHONELOOKUP"]) ){   //|| helper.isNullEmptry(addr["CUST_PHONELOOKUP"])
                   callback('Customer phone does not exist',null);
                 }else{
                   ordering_phoneNumber = String(0) + (!helper.isNullEmptry(addr["ADDR_PHONELOOKUP"]) ? String(addr["ADDR_PHONELOOKUP"]) : '') ;  //String(addr["CUST_PHONELOOKUP"]);
-                  console.log('retreive ordering_phoneNumber : ' + ordering_phoneNumber);
+                  logger.info('retreive ordering_phoneNumber : ' + ordering_phoneNumber);
 
                   callback(null,customer);
                 }
@@ -1077,7 +1075,7 @@ router.post('/createorder', (req, res) => {
       },   
       //Step :: 5 get city ,distinct   
       function(customer,callback){
-        console.log('[Step5] GetArea->area_id'); 
+        logger.info('[Step5] GetArea->area_id'); 
         GetArea({
           licenseCode: process.env.LICENSECODE,
           requestID: uuidv4(),
@@ -1085,7 +1083,7 @@ router.post('/createorder', (req, res) => {
           areaID: area_id //BK_TH
         },function(err,sdkResponse){
           if(err){
-              console.log('Error SDK GetArea : '+err);
+              logger.info('Error SDK GetArea : '+err);
               res.json((new APIError('Could not find the area',404,true)).returnJson());
           }
           
@@ -1112,16 +1110,16 @@ router.post('/createorder', (req, res) => {
           //   return String(web["street_id"]) === String(sdkResponse["AREA_DEF_STREETID"])
           // })[0]["street_id"];
 
-          console.log('web_city : '+web_city);
-          console.log('web_province : '+web_province);
-          console.log('web_distrinct : '+web_distrinct);
-          console.log('web_street : '+web_street);
+          logger.info('web_city : '+web_city);
+          logger.info('web_province : '+web_province);
+          logger.info('web_distrinct : '+web_distrinct);
+          logger.info('web_street : '+web_street);
           callback(null,customer);
         });
       },
       //Step :: 6 create order
       function(customer,callback){   //'customer,'
-        console.log('[Step6] Create_order'); 
+        logger.info('[Step6] Create_order'); 
         let sdk_entries = [];
          
         let delivery_burger = {
@@ -1167,10 +1165,10 @@ router.post('/createorder', (req, res) => {
           cb();
          },function(err){
           if(err){
-            console.log('Error while mapping each entries : '+err);
+            logger.info('Error while mapping each entries : '+err);
           }else{
-            console.log('Completed mapping entries : ');
-            //console.log(sdk_entries);
+            logger.info('Completed mapping entries : ');
+            //logger.info(sdk_entries);
 
             let create_order = {
               'q176:AddressID': address_id,
@@ -1239,24 +1237,24 @@ router.post('/createorder', (req, res) => {
               'tns:creditCardPaymentbool': false,
               'tns:isSuspended': false
             }
-            console.log('Createorder -> '+JSON.stringify(update_order));
+            logger.info('Createorder -> '+JSON.stringify(update_order));
             UpdateOrder(update_order,function(err,sdkResponse){
               if(err){
-                  console.log('Error sdk UpdateOrder : '+err);
+                  logger.info('Error sdk UpdateOrder : '+err);
               }
-              console.log('Completed create order');
-              console.log(sdkResponse);
+              logger.info('Completed create order');
+              logger.info(sdkResponse);
               
               if(!helper.isNullEmptry(sdkResponse) && Number(sdkResponse) > 0){
                 let order_id = sdkResponse;
 
                 mysqldb((err,connection) => {
                   if(err){
-                      console.log('[Connecttion database error] '+err)
+                      logger.info('[Connecttion database error] '+err)
                       callback(err,null);
                   }
     
-                  console.log('[INSERT Order data] '+ sdkResponse)
+                  logger.info('[INSERT Order data] '+ sdkResponse)
                   var orderData  = {
                     orderID: sdkResponse,
                     channel: channel,	
@@ -1286,7 +1284,7 @@ router.post('/createorder', (req, res) => {
                   };
                   connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
                       if (error) {
-                          console.log('[Insert database error] '+error);
+                          logger.info('[Insert database error] '+error);
                           callback(error,null);
                       };
                       connection.release()
@@ -1301,7 +1299,7 @@ router.post('/createorder', (req, res) => {
       }
     ],function(err,jsonReturn){
       if(err){
-        console.log('[waterfall] error');
+        logger.info('[waterfall] error');
         res.json((new APIError('Error rest api /createorder  : '+err,500,true)).returnJson());
       }else{
         res.json(new APIResponse('createorder' ,200,{
@@ -1419,6 +1417,29 @@ router.post('/createorder', (req, res) => {
 
 });
 
+router.get('/orderdetails', (req,res) => {
+  GetOrderDetails({
+    licenseCode: process.env.LICENSECODE,
+    requestID: uuidv4(),
+    language: 'En',
+    conceptID: 2,
+    orderID: req.query.id
+  },function(err,sdkResponse){
+    if(err){
+        logger.info('error at /orderdetails '+err);
+        res.status(404),json((new APIError('Could not find order',404,true)).returnJson());
+    }
+    res.status(200).json(new APIResponse('getOrderDetails' ,200 , {
+      "order_status": sdkResponse["Status"],
+      "order_status_datetime": sdkResponse["StatusTime"],
+      "order_transaction_date" : sdkResponse["StoreDOB"],
+      "order_delivering_duetime" : sdkResponse["StoreDueTime"],
+      "order_store_id" : sdkResponse["StoreID"],
+      "order_store_name" : sdkResponse["StoreName"]
+    }));
+  });
+});
+
 module.exports = router;
 
 /** absolute url is /api/bot/<route path> */
@@ -1462,9 +1483,9 @@ module.exports = router;
     //     //                           areaID: area["area_id"]
     //     //                         },function(err,area_resp){
     //     //                           if(err){
-    //     //                               console.log('GetArea error '+err);
+    //     //                               logger.info('GetArea error '+err);
     //     //                           }
-    //     //                           console.log(i++);
+    //     //                           logger.info(i++);
     //     //                           return {...store1112, ...area ,...area_resp};
     //     //                         })
                   
@@ -1489,7 +1510,7 @@ module.exports = router;
   // }
   // GetStoresAreaList(get_store_args,function(err,sdkResponse){
   //   if(err){
-  //       console.log('err '+err);
+  //       logger.info('err '+err);
   //   }
   //   let stores = sdkResponse["CC_STORE_AREA"].map( store => {
   //     return {
@@ -1499,7 +1520,7 @@ module.exports = router;
   //     }
   //   });
 
-  //  console.log('GetStoresAreaList => output '+stores.length);
+  //  logger.info('GetStoresAreaList => output '+stores.length);
   //  GetAreaAllStore(stores,function(err1,modifiedStores){
   //   res.json(modifiedStores);
   //  })
@@ -1514,7 +1535,7 @@ module.exports = router;
     //     areaID: store["area_id"]
     //   },function(err,areaResp){
     //     if(err1){
-    //         console.log('err '+err1);
+    //         logger.info('err '+err1);
     //     }
     //     return areaResp;
     //   });

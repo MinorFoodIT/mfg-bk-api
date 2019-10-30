@@ -13,8 +13,8 @@ const expressWinston = require('express-winston');
 const winstonInstance = require('winston');
 const moment = require('moment');
 //Swagger
-// var swaggerUi = require('swagger-ui-express'), swaggerDocument = require('./common/swagger.json');
-// var swStats = require('swagger-stats');
+var swaggerUi = require('swagger-ui-express'), swaggerDocument = require('./common/swagger.json');
+var swStats = require('swagger-stats');
 const APIError = require('./common/APIError');
 // make bluebird default Promise
 Promise = require('bluebird');
@@ -22,8 +22,8 @@ Promise = require('bluebird');
 var config = require('./common/config');    //const configEnv = require('dotenv').config()
 var routes = require('./routes/index-route');
 var app = express();    //require('https').globalAgent.options.ca = require('ssl-root-cas/latest').create();
-// app.use(swStats.getMiddleware({swaggerSpec:swaggerDocument}));      // parse body params and attache them to req.body
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));  //swagger
+app.use(swStats.getMiddleware({swaggerSpec:swaggerDocument}));      // parse body params and attache them to req.body
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));  //swagger
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -134,41 +134,3 @@ app.use((err, req, res, next) => {// eslint-disable-line no-unused-vars
 });
 
 module.exports = app;
-// var sysparameter = require('./SDK/service');
-// var GetCompList = require('./SDK/getCompList');
-// var GetActiveOrderList = require('./SDK/getActiveOrderList');
-// var GetOrderDetails = require('./SDK/getOrderDetails');
-// var GetOrderStatusList = require('./SDK/getOrderStatusList');
-// var GetCustomerByID = require('./SDK/getCustomerByID');
-// var GetCustomerAddresses = require('./SDK/getCustomerAddresses');
-// var UpdateOrder = require('./SDK/updateOrder');
-// var GetStore = require('./SDK/getStore');
-// var GetItem = require('./SDK/getItem');
-
-// //let sdkResponse;
-// var get_comp_args = {
-//     licenseCode: process.env.LICENSECODE,
-//     requestID: '201909171328',
-//     language: 'En',
-//     conceptID: 1,
-//     menuTemplateID: 7
-// }
-// GetCompList(get_comp_args,function(err,sdkResponse){
-//     if(err){
-//         console.log('err '+err);
-//     }
-//     //console.log(sdkResponse);
-//     console.log(Object.keys(sdkResponse));class
-// });
-
-
-// app.get('/', function (req, res) {
-//    res.send('Hello World');
-// })
-
-// var server = app.listen(8081, function () {
-//    var host = server.address().address
-//    var port = server.address().port
-   
-//    console.log("Example app listening at http://%s:%s", host, port)
-// })

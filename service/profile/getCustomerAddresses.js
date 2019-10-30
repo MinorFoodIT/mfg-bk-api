@@ -9,16 +9,15 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetCustomerAddresses(args, function(err1, result) {
+          if(!result.GetCustomerAddressesResult){
+            cb(err1,result.SDKResult);
+          }else{
+            cb(err1,result.GetCustomerAddressesResult);
+          }
+        }); 
       }
-      client.GetCustomerAddresses(args, function(err1, result) {
-            //console.log('GetCustomerAddressesResult');
-            
-            if(!result.GetCustomerAddressesResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetCustomerAddressesResult);
-            }
-      });  
   });
 }
 

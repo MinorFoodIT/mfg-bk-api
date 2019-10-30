@@ -9,16 +9,17 @@ module.exports = function(args,cb) {
   }, function(err, client) {
       if(err){
         console.log(err);
+      }else{
+        client.GetWebCitiesList(args, function(err1, result) {
+              //console.log('GetWebCitiesList');
+            
+              if(!result.GetWebCitiesListResult){
+                cb(err1,result.SDKResult);
+              }else{
+                cb(err1,result.GetWebCitiesListResult);
+              }
+        });  
       }
-      client.GetWebCitiesList(args, function(err1, result) {
-            //console.log('GetWebCitiesList');
-          
-            if(!result.GetWebCitiesListResult){
-              cb(err1,result.SDKResult);
-            }else{
-              cb(err1,result.GetWebCitiesListResult);
-            }
-      });  
   });
 }
 
