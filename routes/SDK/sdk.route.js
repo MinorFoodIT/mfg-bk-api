@@ -29,7 +29,7 @@ const RegisterAddress = require('../../service/profile/registerAddress');
 const GetCustomerAddresses = require('../../service/profile/getCustomerAddresses');
 const UpdateOrder = require('../../service/updateOrder');
 const GetStore = require('../../service/geo/getStore');
-const GetOrderDetails = require('../../service/order/GetOrderDetails');
+const GetOrderDetails = require('../../service/order/getOrderDetails');
 const {entry_status ,entry_type} = require('./enums');
 
 
