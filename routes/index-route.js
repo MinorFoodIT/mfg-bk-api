@@ -58,7 +58,7 @@ router.post('/register', (req, res) => {
 router.post('/login', (req, res) => {
     const  email  =  req.body.email;
     const  password  =  req.body.password;
-    logger.info('/api/login => name='+name +',email='+email);
+    logger.info('/api/login => email='+email);
     database.findUserByEmail(email, (err, user)=>{
         if (err) return  res.status(500).send((new APIError(err,500,true)).returnJson());
         if (!user) return  res.status(404).send((new APIError('User not found!',404,true)).returnJson());

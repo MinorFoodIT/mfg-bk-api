@@ -39,7 +39,7 @@ server.on('listening', onListening);
 
 sdkCache.then(started =>{
   logger.info('[Cache] statistics');
-  logger.info(nodeCache.getStats());
+  logger.info(JSON.stringify(nodeCache.getStats()));
   logger.info('- - - - - - - - - -');
 });
 

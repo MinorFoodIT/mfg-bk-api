@@ -367,7 +367,7 @@ let funcCompList = () => {
 
 let loadingFirst = async() =>{
     logger.info('[Cache] load '+new Date());
-    return await Promise.all([
+    await Promise.all([
         funcStores(),
         funcProvinces(),
         funcCities(),
@@ -378,6 +378,8 @@ let loadingFirst = async() =>{
         funcWebCities(), //Include webDistrinct ,webstreet
         funcCompList()
     ]);
+    logger.info('[Cache] load done '+new Date());
+    return new Date();
 }
 
 module.exports = loadingFirst();
