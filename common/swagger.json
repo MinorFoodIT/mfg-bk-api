@@ -1,1153 +1,103 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "description": "Burker King @Thailand Delivery Platform.",
-      "version": "1.0.1",
-      "title": "Burker King @Thailand Delivery APIs Platform",
-      "termsOfService": "",
-      "contact": {
-        "email": "akarat_su@minor.com"
-      },
-      "license": {
-        "name": "Apache 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-      }
+  "swagger": "2.0",
+  "info": {
+    "description": "Burker King @Thailand Delivery Platform.",
+    "version": "1.0.1",
+    "title": "Burker King @Thailand Delivery APIs Platform",
+    "termsOfService": "",
+    "contact": {
+      "email": "akarat_su@minor.com"
     },
-    "host": "n.api-uat.com",
-    "basePath": "/api",
-    "tags": [
-      {
-        "name": "Authentication",
-        "description": "Client registration and login to get access token"
-      },
-      {
-        "name": "Store information",
-        "description": " "
-      },
-      {
-        "name": "Customer management",
-        "description": "Customer and addresses registration"
-      },
-      {
-        "name": "Order management",
-        "description": " "
-      }
-    ],
-    "schemes": [
-      "https"
-    ],
-    "paths": {
-      "/register": {
-        "post": {
-          "tags": [
-            "Authentication"
-          ],
-          "summary": "Create a new client application",
-          "description": "Register new client with name ,email and password",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "name",
-              "in": "body",
-              "description": "Client name",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "email",
-              "in": "body",
-              "description": "Email Identification",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "password",
-              "in": "body",
-              "description": "Password",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "access_token": {
-                    "type": "string"
-                  },
-                  "expires_in": {
-                    "type": "number"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "n.api-uat.com",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Client registration and login to get access token"
+    },
+    {
+      "name": "Store information",
+      "description": " "
+    },
+    {
+      "name": "Customer management",
+      "description": "Customer and addresses registration"
+    },
+    {
+      "name": "Order management",
+      "description": " "
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Create a new client application",
+        "description": "Register new client with name ,email and password",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "body",
+            "description": "Client name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "body",
+            "description": "Email Identification",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "Password",
+            "required": true,
+            "type": "string"
           }
-        }
-      },
-      "/login": {
-        "post": {
-          "tags": [
-            "Authentication"
-          ],
-          "summary": "Get access token",
-          "description": "Get access token",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "email",
-              "in": "body",
-              "description": "Email Identification",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "password",
-              "in": "body",
-              "description": "Password",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "access_token": {
-                    "type": "string"
-                  },
-                  "expires_in": {
-                    "type": "number"
-                  }
-                }
-              }
-            },
-            "500,401,404": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "type": "string"
+                },
+                "expires_in": {
+                  "type": "number"
                 }
               }
             }
-          }
-        }
-      },
-      "/v1/customer": {
-        "get": {
-          "tags": [
-            "Customer management"
-          ],
-          "summary": "Get customer registered",
-          "description": "Get customer registered",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "id",
-              "in": "path",
-              "description": "Customer ID",
-              "required": true,
-              "type": "number"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "register_id": {
-                    "type": "string"
-                  },
-                  "customer_id": {
-                    "type": "string"
-                  },
-                  "create_date": {
-                    "type": "string"
-                  },
-                  "cust_token": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/search/address": {
-        "get": {
-          "tags": [
-            "Customer management"
-          ],
-          "summary": "Get customer address registered",
-          "description": "Get customer address registered",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "address_name",
-              "in": "body",
-              "description": "Address name",
-              "required": true,
-              "type": "number"
-            },
-            {
-              "name": "cust_token",
-              "in": "body",
-              "description": "Cust token",
-              "required": true,
-              "type": "number"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "address_id": {
-                    "type": "string"
-                  },
-                  "store_id": {
-                    "type": "string"
-                  },
-                  "area_id": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/registercustomer": {
-        "post": {
-          "tags": [
-            "Customer management"
-          ],
-          "summary": "Add new customer",
-          "description": "Create a new customer then return cust token and IDs",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Client access token from authentication",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-phatform",
-              "in": "header",
-              "description": "Delivery platform",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-channel",
-              "in": "header",
-              "description": "Client channel",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-language",
-              "in": "header",
-              "description": "Prefered language",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "first_name",
-              "in": "body",
-              "description": "First name",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "last_name",
-              "in": "body",
-              "description": "Last name",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "email",
-              "in": "body",
-              "description": "Customer email",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "password",
-              "in": "body",
-              "description": "Customer password",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "phone_number",
-              "in": "body",
-              "description": "Customer phone number",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "facebook_uid",
-              "in": "body",
-              "description": "Facebook account UID",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "offer",
-              "in": "body",
-              "description": "Offer conditional",
-              "required": true,
-              "type": "boolean"
-            },
-            {
-              "name": "gender",
-              "in": "body",
-              "description": "male or female",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "customer_id": {
-                    "type": "number"
-                  },
-                  "register_id": {
-                    "type": "number"
-                  },
-                  "token": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/registeraddress": {
-        "post": {
-          "tags": [
-            "Customer management"
-          ],
-          "summary": "Add new address",
-          "description": "Create a new customer address then to return address ID",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Client access token from authentication",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-phatform",
-              "in": "header",
-              "description": "Delivery platform",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-channel",
-              "in": "header",
-              "description": "Client channel",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-language",
-              "in": "header",
-              "description": "Prefered language",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "cust_token",
-              "in": "body",
-              "description": "Cust token from customer registration to identify customer to add an address",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "build_number",
-              "in": "body",
-              "description": "Build no",
-              "required": false,
-              "type": "string"
-            },
-            {
-              "name": "build_name",
-              "in": "body",
-              "description": "Build name",
-              "required": false,
-              "type": "string"
-            },
-            {
-              "name": "floor",
-              "in": "body",
-              "description": "Floor",
-              "required": false,
-              "type": "string"
-            },
-            {
-              "name": "room_number",
-              "in": "body",
-              "description": "Room number",
-              "required": false,
-              "type": "string"
-            },
-            {
-              "name": "near",
-              "in": "body",
-              "description": "Near by location or place",
-              "required": false,
-              "type": "string"
-            },
-            {
-              "name": "street",
-              "in": "body",
-              "description": "Street",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "subdistrict",
-              "in": "body",
-              "description": "Sub district",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "district",
-              "in": "body",
-              "description": "District",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "province",
-              "in": "body",
-              "description": "Province",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "postcode",
-              "in": "body",
-              "description": "Postal code",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "route_direction",
-              "in": "body",
-              "description": "Route and direction to place or location",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "lat",
-              "in": "body",
-              "description": "Address location with latitude value",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "lng",
-              "in": "body",
-              "description": "Address location with longtitude value",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "is_default",
-              "in": "body",
-              "description": "true or false",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "store_name",
-              "in": "body",
-              "description": "Store name to ordering",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "store_id",
-              "in": "body",
-              "description": "Store id to ordering",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "area_id",
-              "in": "body",
-              "description": "Area id of store",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "address_id": {
-                    "type": "number"
-                  },
-                  "create_date": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "500,401": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/createorder": {
-        "post": {
-          "tags": [
-            "Order management"
-          ],
-          "summary": "Add new order to store",
-          "description": "Create a new order then return back orderID",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Client access token from authentication",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-phatform",
-              "in": "header",
-              "description": "Delivery platform",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-channel",
-              "in": "header",
-              "description": "Client channel",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "x-language",
-              "in": "header",
-              "description": "Prefered language",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "cust_token",
-              "in": "body",
-              "description": "Cust token from customer registration to identify customer to create order",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "order_method",
-              "in": "body",
-              "description": "now or future",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "shipping_method",
-              "in": "body",
-              "description": "Must be delivery",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "address_id",
-              "in": "body",
-              "description": "The ID of address for order delivering to store",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "store_id",
-              "in": "body",
-              "description": "Store ID according to order delivering",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "entries",
-              "in": "body",
-              "description": "Facebook account UID",
-              "required": true,
-              "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/definitions/entry"
-                }
-              }
-            },
-            {
-              "name": "gross_total",
-              "in": "body",
-              "description": "Gross total",
-              "required": true,
-              "type": "number"
-            },
-            {
-              "name": "discounts",
-              "in": "body",
-              "description": "Discount",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "discount_total",
-              "in": "body",
-              "description": "Discount total",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "payment_amount",
-              "in": "body",
-              "description": "Payment amount",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "order_note",
-              "in": "body",
-              "description": "Note",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "customer_id": {
-                    "type": "number"
-                  },
-                  "register_id": {
-                    "type": "number"
-                  },
-                  "token": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/store": {
-        "get": {
-          "tags": [
-            "Store information"
-          ],
-          "summary": "Get store info by ID",
-          "description": "Get store",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "id",
-              "in": "path",
-              "description": "Store ID",
-              "required": true,
-              "type": "number"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "store_id": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/store_assign/geocode": {
-        "get": {
-          "tags": [
-            "Store information"
-          ],
-          "summary": "Finding BK store with latitude and longtitude",
-          "description": "Finding store",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "lat",
-              "in": "path",
-              "description": "Latitude",
-              "required": true,
-              "type": "number"
-            },
-            {
-              "name": "lng",
-              "in": "path",
-              "description": "Longtitude",
-              "required": true,
-              "type": "number"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "store_id": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/store_area_zone/store": {
-        "get": {
-          "tags": [
-            "Store information"
-          ],
-          "summary": "Get all area defined with store ID",
-          "description": "Areas of store",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "id",
-              "in": "path",
-              "description": "Store ID",
-              "required": true,
-              "type": "number"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "store_id": {
-                    "type": "string"
-                  },
-                  "area_id": {
-                    "type": "string"
-                  },
-                  "zone_id": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/store_area_zone": {
-        "get": {
-          "tags": [
-            "Store information"
-          ],
-          "summary": "Get all area defined each of store",
-          "description": "Areas of stores",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "store_id": {
-                    "type": "string"
-                  },
-                  "area_id": {
-                    "type": "string"
-                  },
-                  "zone_id": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/discounts": {
-        "get": {
-          "tags": [
-            "Store information"
-          ],
-          "summary": "Get discounts",
-          "description": "discount",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "discount_id": {
-                    "type": "string"
-                  },
-                  "discount_name": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/v1/area": {
-        "get": {
-          "tags": [
-            "Store information"
-          ],
-          "summary": "Get area inforamtion ,street ,distinct and province",
-          "description": "Get area inforamtion ,street ,distinct and province",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "Authorization",
-              "in": "header",
-              "description": "Access token",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "name": "id",
-              "in": "path",
-              "description": "Area ID",
-              "required": true,
-              "type": "number"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "successful creation",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "AREA_ID": {
-                    "type": "string"
-                  },
-                  "AREA_NAME": {
-                    "type": "string"
-                  },
-                  "AREA_PROVINCEID": {
-                    "type": "string"
-                  },
-                  "AREA_PROVINCE_NAME": {
-                    "type": "string"
-                  },
-                  "AREA_CITYID": {
-                    "type": "string"
-                  },
-                  "AREA_CITY_NAME": {
-                    "type": "string"
-                  },
-                  "AREA_DISTRICTID": {
-                    "type": "string"
-                  },
-                  "AREA_DISTRICT_NAME": {
-                    "type": "string"
-                  },
-                  "AREA_STREETID": {
-                    "type": "string"
-                  },
-                  "AREA_STREET_NAME": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "404": {
-              "description": "Invalid data",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "number"
-                  },
-                  "message": {
-                    "type": "string"
-                  }
+          },
+          "500": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
                 }
               }
             }
@@ -1155,45 +105,1168 @@
         }
       }
     },
-    "_securityDefinitions": {
-      "api_key": {
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
+    "/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get access token",
+        "description": "Get access token",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "body",
+            "description": "Email Identification",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "Password",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "type": "string"
+                },
+                "expires_in": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "500,401,404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "definitions": {
-      "entry": {
-        "type": "object",
-        "properties": {
-          "item_id": {
-            "type": "integer"
-          },
-          "level": {
-            "type": "integer"
-          },
-          "long_name": {
+    "/v1/customer": {
+      "get": {
+        "tags": [
+          "Customer management"
+        ],
+        "summary": "Get customer registered",
+        "description": "Get customer registered",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
             "type": "string"
           },
-          "short_name": {
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Customer ID",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "register_id": {
+                  "type": "string"
+                },
+                "customer_id": {
+                  "type": "string"
+                },
+                "create_date": {
+                  "type": "string"
+                },
+                "cust_token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/search/address": {
+      "get": {
+        "tags": [
+          "Customer management"
+        ],
+        "summary": "Get customer address registered",
+        "description": "Get customer address registered",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
             "type": "string"
           },
-          "name": {
-            "type": "string"
-          },
-          "price": {
+          {
+            "name": "address_name",
+            "in": "body",
+            "description": "Address name",
+            "required": true,
             "type": "number"
           },
-          "weight": {
+          {
+            "name": "cust_token",
+            "in": "body",
+            "description": "Cust token",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "address_id": {
+                  "type": "string"
+                },
+                "store_id": {
+                  "type": "string"
+                },
+                "area_id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/registercustomer": {
+      "post": {
+        "tags": [
+          "Customer management"
+        ],
+        "summary": "Add new customer",
+        "description": "Create a new customer then return cust token and IDs",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Client access token from authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-phatform",
+            "in": "header",
+            "description": "Delivery platform",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-channel",
+            "in": "header",
+            "description": "Client channel",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-language",
+            "in": "header",
+            "description": "Prefered language",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "first_name",
+            "in": "body",
+            "description": "First name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "last_name",
+            "in": "body",
+            "description": "Last name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "body",
+            "description": "Customer email",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "Customer password",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone_number",
+            "in": "body",
+            "description": "Customer phone number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "facebook_uid",
+            "in": "body",
+            "description": "Facebook account UID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "offer",
+            "in": "body",
+            "description": "Offer conditional",
+            "required": true,
+            "type": "boolean"
+          },
+          {
+            "name": "gender",
+            "in": "body",
+            "description": "male or female",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customer_id": {
+                  "type": "number"
+                },
+                "register_id": {
+                  "type": "number"
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/registeraddress": {
+      "post": {
+        "tags": [
+          "Customer management"
+        ],
+        "summary": "Add new address",
+        "description": "Create a new customer address then to return address ID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Client access token from authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-phatform",
+            "in": "header",
+            "description": "Delivery platform",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-channel",
+            "in": "header",
+            "description": "Client channel",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-language",
+            "in": "header",
+            "description": "Prefered language",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cust_token",
+            "in": "body",
+            "description": "Cust token from customer registration to identify customer to add an address",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "build_number",
+            "in": "body",
+            "description": "Build no",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "build_name",
+            "in": "body",
+            "description": "Build name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "floor",
+            "in": "body",
+            "description": "Floor",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "room_number",
+            "in": "body",
+            "description": "Room number",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "near",
+            "in": "body",
+            "description": "Near by location or place",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "street",
+            "in": "body",
+            "description": "Street",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subdistrict",
+            "in": "body",
+            "description": "Sub district",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "district",
+            "in": "body",
+            "description": "District",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "province",
+            "in": "body",
+            "description": "Province",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "postcode",
+            "in": "body",
+            "description": "Postal code",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "route_direction",
+            "in": "body",
+            "description": "Route and direction to place or location",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lat",
+            "in": "body",
+            "description": "Address location with latitude value",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lng",
+            "in": "body",
+            "description": "Address location with longtitude value",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "is_default",
+            "in": "body",
+            "description": "true or false",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "store_name",
+            "in": "body",
+            "description": "Store name to ordering",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "store_id",
+            "in": "body",
+            "description": "Store id to ordering",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "area_id",
+            "in": "body",
+            "description": "Area id of store",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "address_id": {
+                  "type": "number"
+                },
+                "create_date": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500,401": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/createorder": {
+      "post": {
+        "tags": [
+          "Order management"
+        ],
+        "summary": "Add new order to store",
+        "description": "Create a new order then return back orderID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Client access token from authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-phatform",
+            "in": "header",
+            "description": "Delivery platform",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-channel",
+            "in": "header",
+            "description": "Client channel",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-language",
+            "in": "header",
+            "description": "Prefered language",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cust_token",
+            "in": "body",
+            "description": "Cust token from customer registration to identify customer to create order",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "order_method",
+            "in": "body",
+            "description": "now or future",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "shipping_method",
+            "in": "body",
+            "description": "Must be delivery",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "address_id",
+            "in": "body",
+            "description": "The ID of address for order delivering to store",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "store_id",
+            "in": "body",
+            "description": "Store ID according to order delivering",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "entries",
+            "in": "body",
+            "description": "Facebook account UID",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/entry"
+              }
+            }
+          },
+          {
+            "name": "gross_total",
+            "in": "body",
+            "description": "Gross total",
+            "required": true,
             "type": "number"
           },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/entry"
+          {
+            "name": "discounts",
+            "in": "body",
+            "description": "Discount",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "discount_total",
+            "in": "body",
+            "description": "Discount total",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payment_amount",
+            "in": "body",
+            "description": "Payment amount",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "order_note",
+            "in": "body",
+            "description": "Note",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customer_id": {
+                  "type": "number"
+                },
+                "register_id": {
+                  "type": "number"
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/store": {
+      "get": {
+        "tags": [
+          "Store information"
+        ],
+        "summary": "Get store info by ID",
+        "description": "Get store",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Store ID",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "store_id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/store_assign/geocode": {
+      "get": {
+        "tags": [
+          "Store information"
+        ],
+        "summary": "Finding BK store with latitude and longtitude",
+        "description": "Finding store",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "lat",
+            "in": "path",
+            "description": "Latitude",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "lng",
+            "in": "path",
+            "description": "Longtitude",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "store_id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/store_area_zone/store": {
+      "get": {
+        "tags": [
+          "Store information"
+        ],
+        "summary": "Get all area defined with store ID",
+        "description": "Areas of store",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Store ID",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "store_id": {
+                  "type": "string"
+                },
+                "area_id": {
+                  "type": "string"
+                },
+                "zone_id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/store_area_zone": {
+      "get": {
+        "tags": [
+          "Store information"
+        ],
+        "summary": "Get all area defined each of store",
+        "description": "Areas of stores",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "store_id": {
+                  "type": "string"
+                },
+                "area_id": {
+                  "type": "string"
+                },
+                "zone_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/discounts": {
+      "get": {
+        "tags": [
+          "Store information"
+        ],
+        "summary": "Get discounts",
+        "description": "discount",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "discount_id": {
+                  "type": "string"
+                },
+                "discount_name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/area": {
+      "get": {
+        "tags": [
+          "Store information"
+        ],
+        "summary": "Get area inforamtion ,street ,distinct and province",
+        "description": "Get area inforamtion ,street ,distinct and province",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Area ID",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "AREA_ID": {
+                  "type": "string"
+                },
+                "AREA_NAME": {
+                  "type": "string"
+                },
+                "AREA_PROVINCEID": {
+                  "type": "string"
+                },
+                "AREA_PROVINCE_NAME": {
+                  "type": "string"
+                },
+                "AREA_CITYID": {
+                  "type": "string"
+                },
+                "AREA_CITY_NAME": {
+                  "type": "string"
+                },
+                "AREA_DISTRICTID": {
+                  "type": "string"
+                },
+                "AREA_DISTRICT_NAME": {
+                  "type": "string"
+                },
+                "AREA_STREETID": {
+                  "type": "string"
+                },
+                "AREA_STREET_NAME": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orderdetails": {
+      "get": {
+        "tags": [
+          "Order management"
+        ],
+        "summary": "Get order details",
+        "description": "Get order details",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Access token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Order ID",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful creation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "order_status": {
+                  "type": "string"
+                },
+                "order_status_datetime": {
+                  "type": "string"
+                },
+                "order_transaction_date": {
+                  "type": "string"
+                },
+                "order_delivering_duetime": {
+                  "type": "string"
+                },
+                "order_store_id": {
+                  "type": "string"
+                },
+                "order_store_name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
       }
     }
+  },
+  "_securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "entry": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "long_name": {
+          "type": "string"
+        },
+        "short_name": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "number"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/entry"
+          }
+        }
+      }
+    }
   }
+}

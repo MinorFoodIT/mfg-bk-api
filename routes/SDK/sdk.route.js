@@ -30,6 +30,7 @@ const GetCustomerAddresses = require('../../service/profile/getCustomerAddresses
 const UpdateOrder = require('../../service/updateOrder');
 const GetStore = require('../../service/geo/getStore');
 const GetOrderDetails = require('../../service/order/getOrderDetails');
+const GetItem = require('../../service/master/getItem');
 const {entry_status ,entry_type} = require('./enums');
 
 
@@ -148,7 +149,10 @@ router.get('/store_area_zone/store', async (req, res) => {
       res.status(200).json(new APIResponse('getStoreAreaZone' ,200,storesArea));
     }catch(err){
       logger.info(err.message);
-      res.status(404).json((new APIError('Could not find any area and zone',404,true)).returnJson());
+      if(helper.isNullEmptry(myCache.get("stores_area"))){
+        return res.status(500).json((new APIError('Internal invalid cached data ,please try again',500,true)).returnJson());
+      }
+      return res.status(404).json((new APIError('Could not find any area and zone',404,true)).returnJson());
     }
   });
 
@@ -156,7 +160,7 @@ router.get('/store_area_zone/store', async (req, res) => {
  * Get store area list
  */
 router.get('/store_area_zone', async (req, res) => {
-  res.status(200).json(new APIResponse('getStoreAreaZone' ,200,myCache.get("stores_area")));
+  res.status(200).json(new APIResponse('getStoreAreaZone' ,200,helper.isNullEmptry(myCache.get("stores_area"))?[]:myCache.get("stores_area")));
 });
 
 /**
@@ -164,7 +168,7 @@ router.get('/store_area_zone', async (req, res) => {
  * 
  */
 router.get('/discounts', async (req, res) => {
-  let web_comp = myCache.get("web_comp");
+  let web_comp = helper.isNullEmptry(myCache.get("web_comp"))?[]:myCache.get("web_comp");
   let return_comp = web_comp.map(comp => {
     return {
       discount_id: comp["comp_id"],
@@ -206,25 +210,25 @@ router.get('/area', async (req, res) => {
     }
     
     //logger.info(myCache.keys());
-    let web_city = myCache.get("web_cities").filter(web =>{
+    let web_city = helper.isNullEmptry(myCache.get("web_cities"))?[{city_name_thai:''}]:myCache.get("web_cities").filter(web =>{
       return String(web["city_id"]) === String(sdkResponse["AREA_CITYID"])
     });
     logger.info('web_city :');
     logger.info(web_city);
 
-    let web_province = myCache.get("web_provinces").filter(web =>{
+    let web_province = helper.isNullEmptry(myCache.get("web_provinces"))?[{province_name_thai: ''}]:myCache.get("web_provinces").filter(web =>{
       return String(web["province_id"]) === String(sdkResponse["AREA_PROVINCEID"])
     });
     logger.info('web_province :');
     logger.info(web_province);
 
-    let web_distrinct = myCache.get("web_districts").filter(web =>{
+    let web_distrinct = helper.isNullEmptry(myCache.get("web_districts"))?[{distinct_thai: ''}]:myCache.get("web_districts").filter(web =>{
       return String(web["distinct_id"]) === String(sdkResponse["AREA_DEF_DISTRICTID"])
     });
     logger.info('web_distrinct :');
     logger.info(web_distrinct);
 
-    let web_street = myCache.get("web_streets").filter(web =>{
+    let web_street = helper.isNullEmptry(myCache.get("web_streets"))?[{street_name: ''}]:myCache.get("web_streets").filter(web =>{
       return String(web["street_id"]) === String(sdkResponse["AREA_DEF_STREETID"])
     });
     logger.info('web_street :');
@@ -641,7 +645,7 @@ router.post('/registeraddress', (req, res) => {
     let area_id = bodyData.area_id;
     let lat = bodyData.lat;
     let lng = bodyData.lng;
-    
+
     let web_city = myCache.get("web_cities").filter((web) => {
       return String(web.city_name) === String(province) || String(web.city_name_thai) === String(province);
     })
@@ -843,7 +847,6 @@ router.post('/registeraddress', (req, res) => {
               });
             }
           });
-
       }
     ],function(err,jsonReturn){
       if(err){
@@ -860,6 +863,9 @@ router.post('/registeraddress', (req, res) => {
     });
 
   }catch(err){
+    if(helper.isNullEmptry(myCache.get("web_cities")) || helper.isNullEmptry(myCache.get("web_districts"))){
+      return res.status(500).json((new APIError('Internal invalid cached data ,please try again',500,true)).returnJson());
+    }
     return res.status(500).json((new APIError('Method post data error : '+err.stack,500,true)).returnJson());
   }
 });
@@ -1121,7 +1127,7 @@ router.post('/createorder', (req, res) => {
       function(customer,callback){   //'customer,'
         logger.info('[Step6] Create_order'); 
         let sdk_entries = [];
-         
+        let sdk_entries_level1 = []; 
         let delivery_burger = {
           'q176:CEntry':{
             'q176:Category': -1,
@@ -1141,11 +1147,56 @@ router.post('/createorder', (req, res) => {
           }
         }
          //Check item order ,Entries
+        //***1112 delivery ***/ 
+        //   sdk_bkweb_entry = {
+        //   'q176:CEntry' : {
+        //     'q176:Category': -1,
+        //     'q176:DiscountPrice': 0,
+        //     'q176:Entries': [],//delivery_burger,
+        //     'q176:ItemID': 991112,
+        //     'q176:Level': 0,
+        //     'q176:LongName': '**burgerking web**',
+        //     'q176:ModCode': entry_status.WITH,
+        //     'q176:Name': '**burgerking web**',
+        //     'q176:OrdrMode': 'OM_SAVED',
+        //     'q176:Price': 0,
+        //     'q176:ShortName': '**burgerking web**',
+        //     'q176:Status': entry_status.NOTAPPLIED,
+        //     'q176:Type': entry_type.ITEM,
+        //     'q176:Weight': 0
+        //   }    
+        //  };
+        //  sdk_entries.push(sdk_bkweb_entry);
+
+         //For each entry items
          each(entries,function(entry,cb){
+          each(entry.entries,function(entry_1,cb_1){
+            let sdk_entry1 = {
+              'q176:CEntry' : {
+                'q176:Category': -1,
+                'q176:DiscountPrice': 0,
+                'q176:Entries': [],
+                'q176:ItemID': entry_1.item_id,
+                'q176:Level': entry_1.level,
+                'q176:LongName': entry_1.long_name,
+                'q176:ModCode': entry_status.WITH,
+                'q176:Name': entry_1.name,
+                'q176:OrdrMode': 'OM_SAVED',
+                'q176:Price': entry_1.price,
+                'q176:ShortName': entry_1.short_name,
+                'q176:Status': entry_status.NOTAPPLIED,
+                'q176:Type': entry_type.ITEM,
+                'q176:Weight': entry_1.weight
+              }
+            };
+            sdk_entries_level1.push({...sdk_entry1});
+          });
+
           let sdk_entry_detail = {
             'q176:Category': -1,
             'q176:DiscountPrice': 0,
-            'q176:Entries': [],//delivery_burger,
+            'q176:Entries': entry.entries.length > 0 ? sdk_entries_level1 :[],//delivery_burger,
+            'q176:IsSpecialMessage': String(entry.level) === String(1)? 1:0,
             'q176:ItemID': entry.item_id,
             'q176:Level': entry.level,
             'q176:LongName': entry.long_name,
@@ -1162,6 +1213,7 @@ router.post('/createorder', (req, res) => {
             'q176:CEntry' : sdk_entry_detail    
           };
           sdk_entries.push({...sdk_entry});
+          sdk_entries_level1 = []; 
           cb();
          },function(err){
           if(err){
@@ -1198,7 +1250,7 @@ router.post('/createorder', (req, res) => {
               'q176:IsExternal': 0,
               'q176:LastSendTime': '0001-01-01T00:00:00',
               'q176:Note': '',
-              'q176:OrderMode': shipping_method === 'delivery' ? 1 : 2,
+              'q176:OrderMode': shipping_method === 'delivery' ? 1 : 2,  //1 delivery
               'q176:OrderName': 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
               'q176:OrderType': order_method === 'now' ? 0 : 1,
               'q176:PromiseTime': 0,
@@ -1214,7 +1266,7 @@ router.post('/createorder', (req, res) => {
               'q176:StoreID': store_id,
               'q176:StoreName': store_name,
               'q176:StoreNumber': store_name,
-              'q176:StoreOrderMode': 0,
+              //'q176:StoreOrderMode': 0, //Order type Pickup
               'q176:StreetID': web_street,
               'q176:SubTotal': check_subtotal,
               'q176:SuspendReason': 0,
@@ -1248,49 +1300,50 @@ router.post('/createorder', (req, res) => {
               if(!helper.isNullEmptry(sdkResponse) && Number(sdkResponse) > 0){
                 let order_id = sdkResponse;
 
-                mysqldb((err,connection) => {
-                  if(err){
-                      logger.info('[Connecttion database error] '+err)
-                      callback(err,null);
-                  }
+                callback(null,sdkResponse)
+                // mysqldb((err,connection) => {
+                //   if(err){
+                //       logger.info('[Connecttion database error] '+err)
+                //       callback(err,null);
+                //   }
     
-                  logger.info('[INSERT Order data] '+ sdkResponse)
-                  var orderData  = {
-                    orderID: sdkResponse,
-                    channel: channel,	
-                    addressID: address_id,
-                    areaID:	area_id,	
-                    storeID: store_id,	
-                    storeName: store_name,	
-                    storeNumber: store_id,	
-                    orderMode:  2 ,//shipping_method === 'delivery' ? '1' : '2' ,	
-                    orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
-                    orderType: order_method === 'now' ? '0' : '1',
-                    //tranDate:	CURRENT_TIMESTAMP(),	
-                    dueDate: null,	
-                    customerID:	customer["CUST_ID"],
-                    grossTotal: gross_total	,
-                    discountTotal: Number(discount_total).toFixed(2),	
-                    refID: '',	
-                    transactionBy:	'',	
-                    //createdDate: CURRENT_TIMESTAMP(),
-                    json:	JSON.stringify(update_order),	
-                    site:	store_id,
-                    status:	'0',	
-                    entries: JSON.stringify(entries),
-                    cookingFinishTime: null,	
-                    pickupFinishTime: null,	
-                    cancelTime: null
-                  };
-                  connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
-                      if (error) {
-                          logger.info('[Insert database error] '+error);
-                          callback(error,null);
-                      };
-                      connection.release()
-                      callback(null,sdkResponse)
-                  });
-                });
+                //   logger.info('[INSERT Order data] '+ sdkResponse)
+                //   var orderData  = {
+                //     orderID: sdkResponse,
+                //     channel: channel,	
+                //     addressID: address_id,
+                //     areaID:	area_id,	
+                //     storeID: store_id,	
+                //     storeName: store_name,	
+                //     storeNumber: store_id,	
+                //     orderMode:  2 ,//shipping_method === 'delivery' ? '1' : '2' ,	
+                //     orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
+                //     orderType: order_method === 'now' ? '0' : '1',
+                //     //tranDate:	CURRENT_TIMESTAMP(),	
+                //     dueDate: null,	
+                //     customerID:	customer["CUST_ID"],
+                //     grossTotal: gross_total	,
+                //     discountTotal: Number(discount_total).toFixed(2),	
+                //     refID: '',	
+                //     transactionBy:	'',	
+                //     //createdDate: CURRENT_TIMESTAMP(),
+                //     json:	JSON.stringify(update_order),	
+                //     site:	store_id,
+                //     status:	'0',	
+                //     entries: JSON.stringify(entries),
+                //     cookingFinishTime: null,	
+                //     pickupFinishTime: null,	
+                //     cancelTime: null
+                //   };
+                //   connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
+                //       if (error) {
+                //           logger.info('[Insert database error] '+error);
+                //           callback(error,null);
+                //       };
+                //       connection.release()
+                //       callback(null,sdkResponse)
+                //   });
+                // });
                 
               }
             });
@@ -1436,6 +1489,31 @@ router.get('/orderdetails', (req,res) => {
       "order_delivering_duetime" : sdkResponse["StoreDueTime"],
       "order_store_id" : sdkResponse["StoreID"],
       "order_store_name" : sdkResponse["StoreName"]
+    }));
+  });
+});
+
+router.get('/item', (req,res) => {
+  GetItem({
+    licenseCode: process.env.LICENSECODE,
+    requestID: uuidv4(),
+    language: 'Th',
+    conceptID: 1,
+    menuTemplateID: 7,
+    itemID: req.query.id
+  },function(err,sdkResponse){
+    if(err){
+        logger.info('error at /item '+err);
+        res.status(404),json((new APIError('Could not find item',404,true)).returnJson());
+    }
+    logger.info(sdkResponse);
+    res.status(200).json(new APIResponse('getItem' ,200 , {
+      "elements": sdkResponse["Elements"],
+      "long_name": sdkResponse["LongName"],
+      "short_name" : sdkResponse["ShortName"],
+      "name" : sdkResponse["Name"],
+      "price" : sdkResponse["Price"],
+      "visible" : sdkResponse["Visible"]
     }));
   });
 });

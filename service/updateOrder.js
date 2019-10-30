@@ -13,7 +13,7 @@ module.exports = function(args,cb) {
         client.UpdateOrder(args, function(err1, result ,rawResponse, soapHeader, rawRequest) {
           // console.log('UpdateOrder');
           // console.log(args);
-          // console.log(rawRequest);
+           console.log(rawRequest);
           // console.log(result);
           if(!result.UpdateOrderResult){
             cb(err1,result.SDKResult);
@@ -21,7 +21,8 @@ module.exports = function(args,cb) {
             cb(err1,result.UpdateOrderResult);
           }     
         },{postProcess: function(_xml) {
-          return _xml.replace('</q176:Entries><q176:Entries>', '');
+          _xml = _xml.replace(/ns[0-9]+:En/g,'q176:En');
+          return _xml.replace(/<\/q176:Entries><q176:Entries>/g, '');
         }}); 
       }
   });

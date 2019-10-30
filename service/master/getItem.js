@@ -11,7 +11,7 @@ module.exports = function(args,cb) {
         console.log(err);
       }else{
         client.GetItem(args, function(err1, result) {
-          console.log('GetItemResult');
+          //console.log('GetItemResult');
           
           if(!result.GetItemResult){
             cb(err1,result.SDKResult);

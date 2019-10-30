@@ -1,6 +1,7 @@
 const winston = require('winston');
 const path = require('path');
 const moment = require('moment');
+const helper = require('./../helper');
 
 var logger = caller => {
     return winston.createLogger({
@@ -10,7 +11,7 @@ var logger = caller => {
             winston.format.label({ label: path.basename(caller) }),
             winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
             winston.format(function dynamicContent(info, opts) {
-                info.message = '' + info.message;
+                info.message = '' +  helper.isArray(info.message) || helper.isObject(info.message) ? helper.formatJSONWrap(info.message) : info.message;
                 return info;
             })(),
             winston.format.simple()
