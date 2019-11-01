@@ -1,0 +1,45 @@
+@startuml
+Client -> API: all request
+note over Client 
+ Request header
+    Authorization : <access token>
+    x-phatform : sdk
+    x-channel : web|mobile
+    x-language : th|en
+end note
+
+alt Ordering
+    group create order
+    Client -> API: POST /createorder request
+    note left 
+    Request body
+        cust_token : <token>
+        order_method : now|future
+        shipping_method : delivery
+        address_id : <string>
+        store_id : <string>
+        entries : list of entry
+        ...
+    end note
+
+    API -[#33BB33]-> Client: data response
+    note right 
+    Response
+        order_id : <string>
+    end note
+    end
+end
+
+alt Search
+    group Find status and detail for order has been created
+        Client -> API: GET /orderdetails request
+        note over Client: order_id
+
+        API -[#33BB33]-> Client: data response
+        note over API 
+        Response
+            status and order details
+        end note
+    end
+end
+@enduml

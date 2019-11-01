@@ -640,7 +640,7 @@ router.post('/registeraddress', (req, res) => {
     let postcode = bodyData.postcode;
     let route_direction = bodyData.route_direction;
     let is_default = bodyData.is_default;
-    let store_name = bodyData.store_name;
+    //let store_name = bodyData.store_name;
     let store_id = bodyData.store_id;
     let area_id = bodyData.area_id;
     let lat = bodyData.lat;
@@ -900,6 +900,15 @@ router.post('/createorder', (req, res) => {
  
     let cusToken = bodyData.cust_token;
     let order_method = bodyData.order_method;
+    let order_datetime = bodyData.order_datetime;
+    if(String(order_method) === String('future')){
+      if(helper.isNullEmptry(order_datetime) || order_datetime.length === 0)
+      {
+        order_datetime = moment().add(30,'minutes').format("YYYY-MM-DDTHH:mm:ss");
+      }
+    }
+    
+
     let shipping_method = bodyData.shipping_method;
     let address_id = bodyData.address_id;
     let store_id = bodyData.store_id;
@@ -990,7 +999,7 @@ router.post('/createorder', (req, res) => {
               //To do check order date and last order date
   
             }else{
-              logger.info((new Date()).getHours());
+              logger.info('Time now = '+ String((new Date()).getHours()) );
               if(parseInt((new Date()).getHours()) < 9  && (true || 'check blacklist'.length > 0) ){
                 logger.info('Order - Check Store: Check Store Open at 10 AM.');
                 return callback('ขออภัย ขณะนี้เป็นเวลาปิดให้บริการจัดส่ง',null);
@@ -1098,24 +1107,6 @@ router.post('/createorder', (req, res) => {
           web_distrinct = String(sdkResponse["AREA_DEF_DISTRICTID"]);
           web_street = String(sdkResponse["AREA_DEF_STREETID"]);
 
-          // web_city = myCache.get("web_cities").filter(web =>{
-          //   return String(web["city_id"]) === String(sdkResponse["AREA_CITYID"])
-          // })[0]["city_id"];
-      
-          // web_province = myCache.get("web_provinces").filter(web =>{
-          //   return String(web["province_id"]) === String(sdkResponse["AREA_PROVINCEID"])
-          // })[0]["province_id"];
-      
-          // let web_distrinct_list = myCache.get("web_districts").filter(web =>{
-          //   return String(web["distinct_id"]) === String(sdkResponse["AREA_DEF_DISTRICTID"])
-          // });
-          
-          // web_distrinct = web_distrinct_list.length > 0 ? web_distrinct_list[0]["distinct_id"] : -1;
-      
-          // web_street = myCache.get("web_streets").filter(web =>{
-          //   return String(web["street_id"]) === String(sdkResponse["AREA_DEF_STREETID"])
-          // })[0]["street_id"];
-
           logger.info('web_city : '+web_city);
           logger.info('web_province : '+web_province);
           logger.info('web_distrinct : '+web_distrinct);
@@ -1127,25 +1118,26 @@ router.post('/createorder', (req, res) => {
       function(customer,callback){   //'customer,'
         logger.info('[Step6] Create_order'); 
         let sdk_entries = [];
-        let sdk_entries_level1 = []; 
-        let delivery_burger = {
-          'q176:CEntry':{
-            'q176:Category': -1,
-            'q176:DiscountPrice': 0,
-            'q176:Entries': '',
-            'q176:ItemID': 6001,
-            'q176:Level': 1,
-            'q176:LongName': 'Delivery Burger',
-            'q176:ModCode': entry_status.NONE,
-            'q176:Name': 'Delivery Burger',
-            'q176:OrdrMode': 'OM_SAVED',
-            'q176:Price': 0,
-            'q176:ShortName': 'Delivery Burger',
-            'q176:Status': entry_status.NOTAPPLIED,
-            'q176:Type': entry_type.ITEM,
-            'q176:Weight': 0
-          }
-        }
+        
+        // let delivery_burger = {
+        //   'q176:CEntry':{
+        //     'q176:Category': -1,
+        //     'q176:DiscountPrice': 0,
+        //     'q176:Entries': '',
+        //     'q176:ItemID': 6001,
+        //     'q176:Level': 1,
+        //     'q176:LongName': 'Delivery Burger',
+        //     'q176:ModCode': entry_status.NONE,
+        //     'q176:Name': 'Delivery Burger',
+        //     'q176:OrdrMode': 'OM_SAVED',
+        //     'q176:Price': 0,
+        //     'q176:ShortName': 'Delivery Burger',
+        //     'q176:Status': entry_status.NOTAPPLIED,
+        //     'q176:Type': entry_type.ITEM,
+        //     'q176:Weight': 0
+        //   }
+        // }
+        
          //Check item order ,Entries
         //***1112 delivery ***/ 
         //   sdk_bkweb_entry = {
@@ -1249,7 +1241,7 @@ router.post('/createorder', (req, res) => {
               'q176:DistrictID': web_distrinct,
               'q176:DriverID': 0,
               'q176:DriverName': '',
-              'q176:DueTime': '0001-01-01T00:00:00',
+              'q176:DueTime': String(order_method) === String('future') ? order_datetime : '0001-01-01T00:00:00',
               'q176:Entries': sdk_entries,
               'q176:FirstSendTime': '0001-01-01T00:00:00',
               'q176:GrossTotal': gross_total,
@@ -1257,7 +1249,7 @@ router.post('/createorder', (req, res) => {
               'q176:IsExternal': 0,
               'q176:LastSendTime': '0001-01-01T00:00:00',
               'q176:Note': '',
-              'q176:OrderMode': shipping_method === 'delivery' ? 1 : 2,  //1 delivery
+              'q176:OrderMode': String(shipping_method) === String('delivery') ? 1 : 2,  //1 delivery
               'q176:OrderName': 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
               'q176:OrderType': order_method === 'now' ? 0 : 1,
               'q176:PromiseTime': 0,
@@ -1296,6 +1288,7 @@ router.post('/createorder', (req, res) => {
               'tns:creditCardPaymentbool': false,
               'tns:isSuspended': false
             }
+
             logger.info('Createorder -> '+JSON.stringify(update_order));
             UpdateOrder(update_order,function(err,sdkResponse){
               if(err){
@@ -1308,49 +1301,49 @@ router.post('/createorder', (req, res) => {
                 let order_id = sdkResponse;
 
                 callback(null,sdkResponse)
-                // mysqldb((err,connection) => {
-                //   if(err){
-                //       logger.info('[Connecttion database error] '+err)
-                //       callback(err,null);
-                //   }
+                mysqldb((err,connection) => {
+                  if(err){
+                      logger.info('[Connecttion database error] '+err)
+                      callback(err,null);
+                  }
     
-                //   logger.info('[INSERT Order data] '+ sdkResponse)
-                //   var orderData  = {
-                //     orderID: sdkResponse,
-                //     channel: channel,	
-                //     addressID: address_id,
-                //     areaID:	area_id,	
-                //     storeID: store_id,	
-                //     storeName: store_name,	
-                //     storeNumber: store_id,	
-                //     orderMode:  2 ,//shipping_method === 'delivery' ? '1' : '2' ,	
-                //     orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
-                //     orderType: order_method === 'now' ? '0' : '1',
-                //     //tranDate:	CURRENT_TIMESTAMP(),	
-                //     dueDate: null,	
-                //     customerID:	customer["CUST_ID"],
-                //     grossTotal: gross_total	,
-                //     discountTotal: Number(discount_total).toFixed(2),	
-                //     refID: '',	
-                //     transactionBy:	'',	
-                //     //createdDate: CURRENT_TIMESTAMP(),
-                //     json:	JSON.stringify(update_order),	
-                //     site:	store_id,
-                //     status:	'0',	
-                //     entries: JSON.stringify(entries),
-                //     cookingFinishTime: null,	
-                //     pickupFinishTime: null,	
-                //     cancelTime: null
-                //   };
-                //   connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
-                //       if (error) {
-                //           logger.info('[Insert database error] '+error);
-                //           callback(error,null);
-                //       };
-                //       connection.release()
-                //       callback(null,sdkResponse)
-                //   });
-                // });
+                  logger.info('[INSERT Order data] '+ sdkResponse)
+                  var orderData  = {
+                    orderID: sdkResponse,
+                    channel: channel,	
+                    addressID: address_id,
+                    areaID:	area_id,	
+                    storeID: store_id,	
+                    storeName: store_name,	
+                    storeNumber: store_id,	
+                    orderMode:  2 ,//shipping_method === 'delivery' ? '1' : '2' ,	
+                    orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
+                    orderType: order_method === 'now' ? '0' : '1',
+                    //tranDate:	CURRENT_TIMESTAMP(),	
+                    dueDate: null,	
+                    customerID:	customer["CUST_ID"],
+                    grossTotal: gross_total	,
+                    discountTotal: Number(discount_total).toFixed(2),	
+                    refID: '',	
+                    transactionBy:	'',	
+                    //createdDate: CURRENT_TIMESTAMP(),
+                    json:	JSON.stringify(update_order),	
+                    site:	store_id,
+                    status:	'0',	
+                    entries: JSON.stringify(entries),
+                    cookingFinishTime: null,	
+                    pickupFinishTime: null,	
+                    cancelTime: null
+                  };
+                  connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
+                      if (error) {
+                          logger.info('[Insert database error] '+error);
+                          callback(error,null);
+                      };
+                      connection.release()
+                      callback(null,sdkResponse)
+                  });
+                });
                 
               }
             });
@@ -1368,113 +1361,9 @@ router.post('/createorder', (req, res) => {
       }
       
     });
-    
-    
-    /*
-    let order = {
-      'web:AddressID': address_id,
-      'web:AreaID': aread_id,
-      'web:AuthReq': 0,
-      //'web:AuthReqReason':'',
-      //'web:AuthTime':'',
-      'web:BackupStoreID': -1,
-      //'web:Balance': 0,
-      'web:Change': check_change,
-      //'web:CheckNumber': '',
-      'web:CityID': web_city,
-      'web:Comps': [],
-      'web:ConceptID': 2,
-      'web:CountryID': 1,
-      'web:CreateBy': phatform + ' - ' + 'burgerking '+channel ,
-      'web:CustomerID': customer["CUST_ID"],
-      //'web:DOB': '',
-      //'web:DateOfTrans': '',
-      'web:DiscountTotal': discount_total.toFixed(2),
-      'web:Discounts': [],
-      'web:DistrictID': web_distrinct,
-      //'web:DriverID': '',
-      //'web:DriverName': '',
-      //'web:DueTime': '',
-      'web:Entries': [],
-      //'web:ExtendedAttributes': [],
-      'web:GrossTotal': gross_total,
-      'web:IsAuth': store_id === -1 ? 0 : 1,
-      //'web:IsExternal': '',
-      'web:Note': [],
-      'web:OrderMode': shipping_method === 'delivery' ? 1 : 2,
-      'web:OrderName': 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
-      'web:OrderType': shipping_method === 'now' ? 0 : 1,
-      //'web:Payments': [],
-      //'web:PromiseTime': '',
-      'web:ProvinceID': web_province,
-      //'web:Remarks': '',
-      'web:SalesAmount': check_total,
-      'web:ServiceCharge': service_change,
-      'web:Source': 2,
-      'web:Status': 0,
-      //'web:StoreDOB': '',
-      //'web:StoreDueTime': '',
-      'web:StoreID': store_id,
-      'web:StoreName': store_name,
-      'web:StoreNumber': store_name,
-      //'web:StoreOrderMode': '',
-      //'web:StoreWebName': '',
-      'web:StreetID': web_street,
-      'web:SubTotal': check_subtotal,
-      'web:Total': check_total,
-      //'web:ValidateStore': '',
-      'web:ZoneID': -1
-    }
-
-
-    let c_check = {
-      ConceptID: '2',
-      StoreID: 'store_id',
-      StoreNumber: 'store_num',
-      StoreName: 'Unspecified',
-      OrderMode: '2', //3; //walkin
-      OrderType: 'order_method',
-      CustomerID: 'token.cust_id',
-      AddressID: 'cust_address_id',
-      CountryID: '1',
-      ProvinceID: 'ADDR_PROVINCEID',
-      CityID: 'ADDR_CITYID',
-      AreaID: 'ADDR_AREAID',
-      DistrictID: 'ADDR_DISTRICTID',
-      StreetID: 'ADDR_STREETID',
-      ZoneID: '-1',
-      Source: '2',
-      Status: '0',
-      GrossTotal: 'Check gross total',
-      DiscountTotal: 'discount total',
-      SubTotal: 'SubTotal',
-      ServiceCharge: '',
-      Total: 'check total',
-      SalesAmount: 'sale amount',
-      Change: 'check change',
-      IsAuth: '1',
-      AuthReq: '0',
-      Entries: [],
-      Comps: [],
-      Discounts: [],
-      CreateBy: 'BKWEB',
-      OrderName: 'order_id',
-      BackupStoreID: '-1',
-    }
-    */
-
-      // let errCheckout = func.errCheckout(checkout);
-
-      // if(!errCheckout.err){
-      //   res.json(new APIResponse('ok success' ,200,errCheckout.msg));
-
-      // }else{
-      //   res.status(400).json((new APIError('Bad request object is missing : '+errCheckout.msg,400,true)).returnJson());
-      // }
   }catch(err){
     return res.status(500).json((new APIError('Method post data error : '+err.stack,500,true)).returnJson());
   }
-
 });
 
 router.get('/orderdetails', (req,res) => {

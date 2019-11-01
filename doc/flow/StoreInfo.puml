@@ -1,0 +1,73 @@
+@startuml
+Client -> API: all request
+note over Client 
+ Request header
+    Authorization : <access token>
+    x-phatform : sdk
+    x-channel : web|mobile
+    x-language : th|en
+end note
+
+group Find store_id with geocode
+Client -> API: GET /store_assign/geocode request
+note over Client: geocode (latitude and longtitude)
+
+API -[#33BB33]-> Client: store detail response
+note over API 
+ Response
+    store_id : <number>
+end note
+end
+
+group Find area of store
+Client -> API: GET /store_area_zone/store request
+note over Client: store_id
+
+API -[#33BB33]-> Client: store area response
+note over API 
+ Response
+    list of area_id
+end note
+end
+
+group Find area details
+Client -> API: GET /area request
+note over Client: area_id
+
+API -[#33BB33]-> Client: area details response
+note over API 
+ Response
+    street ,distinct ,province ,city
+end note
+end
+
+alt Optinal
+   group Find store details
+   Client -> API: GET /store request
+   note over Client: store_id
+
+   API -[#33BB33]-> Client: store details response
+   note over API 
+   Response
+      store details
+   end note
+   end
+
+   group Find discount
+   Client -> API: GET /discounts request
+
+   API -[#33BB33]-> Client: discount response
+   note over API 
+   Response
+      list of discount
+   end note
+   end
+
+   group Find web item
+   Client -> API: GET /item request
+   note over Client: item_id
+
+   API -[#33BB33]-> Client: item detail response
+   end
+end
+@enduml

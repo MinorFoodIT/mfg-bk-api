@@ -1,0 +1,7 @@
+@startuml
+Client -> API: /register request
+API -[#33BB33]-> Client: access token response
+
+Client -> API: /login request
+Client <-[#33BB33]- API: refresh access token response
+@enduml

@@ -1,0 +1,76 @@
+@startuml
+Client -> API: all request
+note over Client 
+ Request header
+    Authorization : <access token>
+    x-phatform : sdk
+    x-channel : web|mobile
+    x-language : th|en
+end note
+
+alt Register
+    group create customer
+    Client -> API: POST /registercustomer request
+    note left 
+    Request body
+        email : <string>
+        phone_number : <string>
+        gender : <string>
+        ...
+    end note
+
+    API -[#33BB33]-> Client: data response
+    note right 
+    Response
+        cust_id : <string>
+        register_id : <string>
+        cust_token : <token>
+    end note
+    end
+
+    group create address
+    Client -> API: POST /registeraddress request
+    note left 
+    Request body
+        cust_token : <token>
+        <color #9918F5>[address details]</color>
+        address_name : <string>
+        store_id : <string>
+        area_id : <string>
+        lat : <string>
+        lng : <string>
+        ...
+    end note
+
+    Client <-[#33BB33]- API: data response
+    note right 
+    Response
+        address_id : <string>
+    end note
+    end
+end
+
+alt Search
+    group Find customer registered
+        Client -> API: GET /customer request
+        note over Client: cust_id
+
+        API -[#33BB33]-> Client: data response
+        note over API 
+        Response
+            register_id and cust token 
+        end note
+    end
+
+    group Find customer address registered
+        Client -> API: GET /search/address request
+        note over Client: address_name ,cust_token
+
+        API -[#33BB33]-> Client: data response
+        note over API 
+        Response
+            address details  
+        end note
+    end
+end
+@enduml
