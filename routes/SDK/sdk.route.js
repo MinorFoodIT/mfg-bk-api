@@ -1176,15 +1176,19 @@ router.post('/createorder', (req, res) => {
                 'q176:Category': -1,
                 'q176:DiscountPrice': 0,
                 'q176:Entries': [],
+                'q176:IsSpecialMessage': 0,
+                'q176:ID': 0,
                 'q176:ItemID': entry_1.item_id,
                 'q176:Level': entry_1.level,
                 'q176:LongName': entry_1.long_name,
                 'q176:ModCode': entry_status.WITH,
+                'q176:ModgroupID': 0,
                 'q176:Name': entry_1.name,
                 'q176:OrdrMode': 'OM_SAVED',
                 'q176:Price': entry_1.price,
                 'q176:ShortName': entry_1.short_name,
                 'q176:Status': entry_status.NOTAPPLIED,
+                'q176:StoreEntryID': 0,
                 'q176:Type': entry_type.ITEM,
                 'q176:Weight': entry_1.weight
               }
@@ -1196,16 +1200,19 @@ router.post('/createorder', (req, res) => {
             'q176:Category': -1,
             'q176:DiscountPrice': 0,
             'q176:Entries': entry.entries.length > 0 ? sdk_entries_level1 :[],//delivery_burger,
-            'q176:IsSpecialMessage': String(entry.level) === String(1)? 1:0,
+            'q176:IsSpecialMessage': 0,//String(entry.level) === String(1)? 1:0,
+            'q176:ID': 0,
             'q176:ItemID': entry.item_id,
             'q176:Level': entry.level,
             'q176:LongName': entry.long_name,
             'q176:ModCode': entry_status.WITH,
+            'q176:ModgroupID': 0,
             'q176:Name': entry.name,
             'q176:OrdrMode': 'OM_SAVED',
             'q176:Price': entry.price,
             'q176:ShortName': entry.short_name,
             'q176:Status': entry_status.NOTAPPLIED,
+            'q176:StoreEntryID': 0,
             'q176:Type': entry_type.ITEM,
             'q176:Weight': entry.weight
           }
@@ -1488,7 +1495,11 @@ router.get('/orderdetails', (req,res) => {
       "order_transaction_date" : sdkResponse["StoreDOB"],
       "order_delivering_duetime" : sdkResponse["StoreDueTime"],
       "order_store_id" : sdkResponse["StoreID"],
-      "order_store_name" : sdkResponse["StoreName"]
+      "order_store_name" : sdkResponse["StoreName"],
+      "sub_total" : sdkResponse["SubTotal"], 
+      "discount_total" : sdkResponse["DiscountTotal"], 
+      "service_charge" : sdkResponse["ServiceCharge"], 
+      "total" : sdkResponse["Total"], 
     }));
   });
 });
