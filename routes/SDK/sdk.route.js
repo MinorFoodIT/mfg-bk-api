@@ -1118,56 +1118,16 @@ router.post('/createorder', (req, res) => {
       function(customer,callback){   //'customer,'
         logger.info('[Step6] Create_order'); 
         let sdk_entries = [];
-        
-        // let delivery_burger = {
-        //   'q176:CEntry':{
-        //     'q176:Category': -1,
-        //     'q176:DiscountPrice': 0,
-        //     'q176:Entries': '',
-        //     'q176:ItemID': 6001,
-        //     'q176:Level': 1,
-        //     'q176:LongName': 'Delivery Burger',
-        //     'q176:ModCode': entry_status.NONE,
-        //     'q176:Name': 'Delivery Burger',
-        //     'q176:OrdrMode': 'OM_SAVED',
-        //     'q176:Price': 0,
-        //     'q176:ShortName': 'Delivery Burger',
-        //     'q176:Status': entry_status.NOTAPPLIED,
-        //     'q176:Type': entry_type.ITEM,
-        //     'q176:Weight': 0
-        //   }
-        // }
-        
-         //Check item order ,Entries
-        //***1112 delivery ***/ 
-        //   sdk_bkweb_entry = {
-        //   'q176:CEntry' : {
-        //     'q176:Category': -1,
-        //     'q176:DiscountPrice': 0,
-        //     'q176:Entries': [],//delivery_burger,
-        //     'q176:ItemID': 991112,
-        //     'q176:Level': 0,
-        //     'q176:LongName': '**burgerking web**',
-        //     'q176:ModCode': entry_status.WITH,
-        //     'q176:Name': '**burgerking web**',
-        //     'q176:OrdrMode': 'OM_SAVED',
-        //     'q176:Price': 0,
-        //     'q176:ShortName': '**burgerking web**',
-        //     'q176:Status': entry_status.NOTAPPLIED,
-        //     'q176:Type': entry_type.ITEM,
-        //     'q176:Weight': 0
-        //   }    
-        //  };
-        //  sdk_entries.push(sdk_bkweb_entry);
 
          //For each entry items
          each(entries,function(entry,cb){
+           //loop sub entries
           each(entry.entries,function(entry_1,cb_1){
             let sdk_entry1 = {
               'q176:CEntry' : {
                 'q176:Category': -1,
                 'q176:DiscountPrice': 0,
-                'q176:Entries': [],
+                'q176:Entries': '',
                 'q176:IsSpecialMessage': 0,
                 'q176:ID': 0,
                 'q176:ItemID': entry_1.item_id,
@@ -1182,7 +1142,7 @@ router.post('/createorder', (req, res) => {
                 'q176:Status': entry_status.NOTAPPLIED,
                 'q176:StoreEntryID': 0,
                 'q176:Type': entry_type.ITEM,
-                'q176:Weight': entry_1.weight
+                'q176:Weight': 0 //entry_1.weight
               }
             };
             sdk_entries_level1.push({...sdk_entry1});
@@ -1191,7 +1151,7 @@ router.post('/createorder', (req, res) => {
           let sdk_entry_detail = {
             'q176:Category': -1,
             'q176:DiscountPrice': 0,
-            'q176:Entries': entry.entries.length > 0 ? sdk_entries_level1 :[],//delivery_burger,
+            'q176:Entries': entry.entries.length > 0 ? sdk_entries_level1 :'',//delivery_burger,
             'q176:IsSpecialMessage': 0,//String(entry.level) === String(1)? 1:0,
             'q176:ID': 0,
             'q176:ItemID': entry.item_id,
@@ -1300,7 +1260,7 @@ router.post('/createorder', (req, res) => {
               if(!helper.isNullEmptry(sdkResponse) && Number(sdkResponse) > 0){
                 let order_id = sdkResponse;
 
-                callback(null,sdkResponse)
+                //callback(null,sdkResponse)
                 mysqldb((err,connection) => {
                   if(err){
                       logger.info('[Connecttion database error] '+err)
