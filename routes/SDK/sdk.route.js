@@ -33,7 +33,6 @@ const GetOrderDetails = require('../../service/order/getOrderDetails');
 const GetItem = require('../../service/master/getItem');
 const {entry_status ,entry_type} = require('./enums');
 
-
 //Check and verify token
 let checktoken =  (req,res,next) => {
   let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase  
@@ -122,7 +121,6 @@ router.get('/store_assign/geocode', async (req, res) => {
           res.status(404).json((new APIError('Could not find a store',404,true)).returnJson());
         })
 });
-
 
 /**
  * Get store area zone
@@ -248,7 +246,6 @@ router.get('/area', async (req, res) => {
     }));
   });
 });
-
 
 /**
  * Register new customer
@@ -459,7 +456,6 @@ router.post('/registercustomer', (req, res) => {
 
     })
 
-
     // let errCustomer = func.errCustomer(customer);
 
     // if(!errCustomer.err){
@@ -515,7 +511,6 @@ router.get('/customer', (req ,res) => {
     }));
   });
 })
-
 
 /**
  * Get address from db
@@ -870,7 +865,6 @@ router.post('/registeraddress', (req, res) => {
   }
 });
 
-
 /**
  * Create Order Process
  * 
@@ -924,6 +918,7 @@ router.post('/createorder', (req, res) => {
     let discount_total = bodyData.discount_total;
     let service_change = bodyData.service_change;
     let payment_amount = bodyData.payment_amount;
+    let payment_ref_no = bodyData.payment_ref_no;
     
     let check_subtotal = (Number(gross_total) - Number(discount_total)).toFixed(2);
     let check_total = (Number(check_subtotal) + Number(service_change)).toFixed(2);
@@ -1212,6 +1207,20 @@ router.post('/createorder', (req, res) => {
               'q176:OrderMode': String(shipping_method) === String('delivery') ? 1 : 2,  //1 delivery
               'q176:OrderName': 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
               'q176:OrderType': order_method === 'now' ? 0 : 1,
+              'q176:Payments': [
+                {
+                  'q176:CC_ORDER_PAYMENT': {
+                    'q176:PAY_AMOUNT': check_total ,//or calculated after take order
+                    'q176:PAY_REF_GATEWAY': 'bkweb' ,
+                    'q176:PAY_REF_IP': '0.0.0.0' ,
+                    'q176:PAY_REF_NO': payment_ref_no ,
+                    'q176:PAY_STATUS': 1 ,
+                    'q176:PAY_STORE_TENDERID': 134 ,
+                    'q176:PAY_SUB_TYPE': 4 ,
+                    'q176:PAY_TYPE': 2 
+                  }
+                }
+              ],
               'q176:PromiseTime': 0,
               'q176:ProvinceID': web_province,
               'q176:RejectReason': 0,
@@ -1261,50 +1270,64 @@ router.post('/createorder', (req, res) => {
                 let order_id = sdkResponse;
 
                 //callback(null,sdkResponse)
-                mysqldb((err,connection) => {
+                GetOrderDetails({
+                  licenseCode: process.env.LICENSECODE,
+                  requestID: uuidv4(),
+                  language: 'En',
+                  conceptID: 2,
+                  orderID: order_id
+                },function(err,orderDetailResp){
                   if(err){
-                      logger.info('[Connecttion database error] '+err)
-                      callback(err,null);
-                  }
-    
-                  logger.info('[INSERT Order data] '+ sdkResponse)
-                  var orderData  = {
-                    orderID: sdkResponse,
-                    channel: channel,	
-                    addressID: address_id,
-                    areaID:	area_id,	
-                    storeID: store_id,	
-                    storeName: store_name,	
-                    storeNumber: store_id,	
-                    orderMode:  2 ,//shipping_method === 'delivery' ? '1' : '2' ,	
-                    orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
-                    orderType: order_method === 'now' ? '0' : '1',
-                    //tranDate:	CURRENT_TIMESTAMP(),	
-                    dueDate: null,	
-                    customerID:	customer["CUST_ID"],
-                    grossTotal: gross_total	,
-                    discountTotal: Number(discount_total).toFixed(2),	
-                    refID: '',	
-                    transactionBy:	'',	
-                    //createdDate: CURRENT_TIMESTAMP(),
-                    json:	JSON.stringify(update_order),	
-                    site:	store_id,
-                    status:	'0',	
-                    entries: JSON.stringify(entries),
-                    cookingFinishTime: null,	
-                    pickupFinishTime: null,	
-                    cancelTime: null
-                  };
-                  connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
-                      if (error) {
-                          logger.info('[Insert database error] '+error);
-                          callback(error,null);
+                      logger.info('error at /orderdetails '+err);
+                      res.status(404),json((new APIError('Could not find order',404,true)).returnJson());
+                  }else if(helper.isNullEmptry(orderDetailResp["Status"])){
+                    mysqldb((err,connection) => {
+                      if(err){
+                          logger.info('[Connecttion database error] '+err)
+                          callback(err,null);
+                      }
+        
+                      logger.info('[INSERT Order data] '+ order_id)
+                      var orderData  = {
+                        orderID: order_id,
+                        channel: channel, 
+                        addressID: address_id,
+                        areaID: area_id,  
+                        storeID: store_id,  
+                        storeName: store_name,  
+                        storeNumber: store_id,  
+                        orderMode:  orderDetailResp["OrderMode"] ,  
+                        orderName: 'Burgerking - '+ channel +' customer booking '+customer["WCUST_FIRSTNAME"],
+                        orderType: orderDetailResp["OrderType"],
+                        tranDate: TIMESTAMP(moment(orderDetailResp["DateOfTrans"]).format('YYYY-MM-DD HH:mm:ss')),//CURRENT_TIMESTAMP(),  
+                        dueDate:  TIMESTAMP(moment(orderDetailResp["DueTime"]).format('YYYY-MM-DD HH:mm:ss')), //null,  
+                        customerID: customer["CUST_ID"],
+                        grossTotal: orderDetailResp["GrossTotal"] ,//gross_total  ,
+                        discountTotal: orderDetailResp["DiscountTotal"] ,//Number(discount_total).toFixed(2), 
+                        refID: '',  
+                        transactionBy:  '', 
+                        createdDate: TIMESTAMP(moment(orderDetailResp["CreateTime"]).format('YYYY-MM-DD HH:mm:ss')) ,//CURRENT_TIMESTAMP(),
+                        json: JSON.stringify(update_order), 
+                        site: store_id,
+                        status:  orderDetailResp["Status"], //'0',  
+                        entries: JSON.stringify(entries),
+                        cookingFinishTime: null,  
+                        pickupFinishTime: null, 
+                        cancelTime: null
                       };
-                      connection.release()
-                      callback(null,sdkResponse)
-                  });
-                });
-                
+                      connection.query('INSERT into orders SET ?', orderData ,function (error, results, fields){
+                          if (error) {
+                              logger.info('[Insert database error] '+error);
+                              callback(error,null);
+                          };
+                          connection.release()
+                          callback(null,sdkResponse)
+                      });
+                    });    
+
+                  }
+                  
+                });//GetOrderDetails
               }
             });
           }
@@ -1396,10 +1419,8 @@ module.exports = router;
 // router.route('/1112delivery/:brand/:order/order')
 //     .get(orderCtrl.findOrder);
 
-
 /** Load user when API with userId route parameter is hit */
 //router.param('userId', userCtrl.load);
-
 
     // await axios.get('https://api-store.1112one.com/api/v1/store_assign/geocode?lat='+lat+'&lng='+lng)
     // .then(async (resp) => {
@@ -1438,7 +1459,6 @@ module.exports = router;
     // .catch((err) => {
     //   res.json([]);
     // }) 
-
 
   // var get_store_args = {
   //   licenseCode: process.env.LICENSECODE,
